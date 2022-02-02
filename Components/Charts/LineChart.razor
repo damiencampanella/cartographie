@@ -1,0 +1,89 @@
+@namespace BlazorFlowly.Components
+@using Title = AntDesign.Charts.Title
+
+<AntDesign.Charts.Line @ref="chart" Config="chartConfig" />
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "";
+    
+    [Parameter]
+    public string XFieldName { get; set; } = "";
+    
+    [Parameter]
+    public string YFieldName { get; set; } = "";
+
+    [Parameter]
+    public Task<VisitorsDataItem[]> DataGetter { get; set; }
+    private VisitorsDataItem[] data;
+
+    private IChartComponent chart;
+
+    private LineConfig chartConfig = new LineConfig{
+       Title = new Title{
+            Visible = false,
+            Text = ""
+        },
+        Padding = "auto",
+        ForceFit = true,
+        XField = "x",
+        YField = "y",
+        Legend = new Legend{
+            Position = "top"
+        },
+        Point = new LineViewConfigPoint{
+            Visible = true,
+            Size = 5
+        },
+        SeriesField = "visitor"
+    };
+
+    protected override async Task OnInitializedAsync(){
+        await base.OnInitializedAsync();
+
+        data = await DataGetter;
+        if(data != null)
+        {
+            await chart.ChangeData(data);
+        } 
+    }
+   protected override async Task OnParametersSetAsync(){
+       await base.OnParametersSetAsync();
+
+        //data = await DataGetter;
+        //await chart.ChangeData(data);
+
+        if(Title != null){
+            Title title = new Title{
+                Visible = true,
+                Text = Title
+            };
+            chartConfig.Title = title;
+        }
+
+        if (XFieldName != null){
+            ValueCatTimeAxis xAxis = new ValueCatTimeAxis{
+                Visible = true,
+                Type = "dateTime",
+                Title = new BaseAxisTitle{
+                    Visible = true,
+                    Text = XFieldName,
+                },
+            };
+            chartConfig.XAxis = xAxis;
+        }
+
+        if (YFieldName != null){
+            ValueAxis yAxis = new ValueAxis{
+                Visible = true,
+                Title = new BaseAxisTitle{
+                    Visible = true,
+                    Text = YFieldName
+                }
+            };
+            chartConfig.YAxis = yAxis;
+        }
+
+       await chart.UpdateConfig(chartConfig);
+   }
+}

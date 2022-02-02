@@ -1,0 +1,34 @@
+﻿@namespace BlazorFlowly.Components
+
+<AntDesign.Tooltip Placement="@Placement.Bottom" Title="HelperContent">
+    <Checkbox @bind-Checked="IsChecked" Disabled="@disabled" OnChange="SetIsCheck">
+        @Label
+    </Checkbox>
+</AntDesign.Tooltip>
+  
+@code {
+    bool disabled = false;
+    [Parameter]
+    public Action<bool> SetChecked { get; set; }
+
+    [Parameter]
+    public string Label { get; set; } = "";
+
+    [Parameter]
+    public string HelperContent { get; set; } = "";
+
+    [Parameter]
+    public bool IsChecked { get; set; } = true;
+
+    
+    private void SetIsCheck(){
+        SetChecked.Invoke(IsChecked);
+    }
+
+    public void ToggleDisable(){
+        disabled = !disabled;
+        StateHasChanged();
+    }
+}
+
+  

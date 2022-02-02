@@ -1,0 +1,34 @@
+{
+  "name": "Campanella Damien",
+  "avatar": "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
+  "userid": "00000001",
+  "email": "",
+  "signature": "",
+  "title": "",
+  "group": "",
+  "tags": [
+    {
+      "key": "0",
+      "label": "Very thoughtful"
+    },
+    {
+      "key": "1",
+      "label": "Focus on Design"
+    }
+  ],
+  "notifyCount": 12,
+  "unreadCount": 11,
+  "country": "France",
+  "geographic": {
+    "province": {
+      "label": "",
+      "key": ""
+    },
+    "city": {
+      "label": "",
+      "key": ""
+    }
+  },
+  "address": "",
+  "phone": ""
+}

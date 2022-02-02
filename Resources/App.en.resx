@@ -1,0 +1,309 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="A droite de chaque station sont affichées les correspondances possibles" xml:space="preserve">
+    <value>On the right to the station is displayed the possible connections</value>
+  </data>
+  <data name="Accès à la position des véhicules impossible" xml:space="preserve">
+    <value>Access to the vehicle positions failed</value>
+  </data>
+  <data name="Afficher cette catégorie" xml:space="preserve">
+    <value>Display this category</value>
+  </data>
+  <data name="Afficher les véhicules" xml:space="preserve">
+    <value>Display the vehicles</value>
+  </data>
+  <data name="Aide en ligne" xml:space="preserve">
+    <value>Online Help</value>
+  </data>
+  <data name="Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes" xml:space="preserve">
+    <value>hover the mouse over one of the vehicles of the list to display the corresponding information</value>
+  </data>
+  <data name="Amenez la souris au-dessus d'une des stations de la liste pour afficher les informations correspondantes" xml:space="preserve">
+    <value>Hover the mouse over one of the stations of the list to display the corresponding information</value>
+  </data>
+  <data name="Amenez la souris au-dessus d'une ligne pour masquer les autres lignes" xml:space="preserve">
+    <value>Hover the mouse over a line to hide the others</value>
+  </data>
+  <data name="Autres Lignes" xml:space="preserve">
+    <value>Other Lines</value>
+  </data>
+  <data name="Capteur" xml:space="preserve">
+    <value>Sensor</value>
+  </data>
+  <data name="Cartographie" xml:space="preserve">
+    <value>Cartography</value>
+  </data>
+  <data name="Ce bouton permet de changer de direction" xml:space="preserve">
+    <value>This button changes the direction</value>
+  </data>
+  <data name="Ce bouton permet de désélectionner la ligne" xml:space="preserve">
+    <value>This button is used to deselect the line</value>
+  </data>
+  <data name="Ce bouton permet de désélectionner toutes les lignes" xml:space="preserve">
+    <value>This button is used to deselect all the lines</value>
+  </data>
+  <data name="Ce bouton permet de désélectionner toutes les lignes de la catégorie correspondante" xml:space="preserve">
+    <value>This button hides all the lines of its corresponding category</value>
+  </data>
+  <data name="Ce bouton permet de griser les autres lignes au lieu de les masquer" xml:space="preserve">
+    <value>This button makes the other lines become greyed instead of hidden</value>
+  </data>
+  <data name="Ce bouton permet de masquer tous les véhicules" xml:space="preserve">
+    <value>This button masks all vehicles</value>
+  </data>
+  <data name="Changer de direction" xml:space="preserve">
+    <value>Change line direction</value>
+  </data>
+  <data name="charge estimée à cette horaire (voir ci-dessus pour la signification des couleurs de charge)" xml:space="preserve">
+    <value>estimated load for this stop (see above for the load colors meaning)</value>
+  </data>
+  <data name="charge importante" xml:space="preserve">
+    <value>important load</value>
+  </data>
+  <data name="charge légère" xml:space="preserve">
+    <value>light load</value>
+  </data>
+  <data name="charge modérée" xml:space="preserve">
+    <value>moderate load</value>
+  </data>
+  <data name="Chargement des données de cartographie" xml:space="preserve">
+    <value>Loading map data</value>
+  </data>
+  <data name="Cliquez sur la variante voulue pour la sélectionner" xml:space="preserve">
+    <value>Click on any variant to select it</value>
+  </data>
+  <data name="Cliquez sur un véhicule pour afficher les informations correspondantes" xml:space="preserve">
+    <value>Click on a vehicle to display the corresponding information</value>
+  </data>
+  <data name="Cliquez sur un véhicule pour zoomer dessus" xml:space="preserve">
+    <value>Click on a vehicle to zoom on it </value>
+  </data>
+  <data name="Cliquez sur une des lignes pour obtenir la liste des variantes et la liste des stations de la variante sélectionnée" xml:space="preserve">
+    <value>Click on one line to display its different variations and the stations list of the selected variation</value>
+  </data>
+  <data name="Cliquez sur une ligne pour la désélectionner" xml:space="preserve">
+    <value>Click on a line to deselect it</value>
+  </data>
+  <data name="Cliquez sur une station pour afficher les horaires des trois prochaines horaires de passage dans la direction sélectionnée" xml:space="preserve">
+    <value>Click on a station to display the next three stop times in the selected direction</value>
+  </data>
+  <data name="Compte" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Courses" xml:space="preserve">
+    <value>Courses</value>
+  </data>
+  <data name="Date au format" xml:space="preserve">
+    <value>Date with format</value>
+  </data>
+  <data name="Enlever la sélection" xml:space="preserve">
+    <value>Remove from selected lines</value>
+  </data>
+  <data name="Gestion du compte" xml:space="preserve">
+    <value>Account center</value>
+  </data>
+  <data name="JJ/MM/AAAA" xml:space="preserve">
+    <value>DD/MM/YYYY</value>
+  </data>
+  <data name="l'horaire de passage donnée est théorique" xml:space="preserve">
+    <value>the stop time is theoretical</value>
+  </data>
+  <data name="l'horaire de passage est calculée en temps réel" xml:space="preserve">
+    <value>the stop time is computed in real time</value>
+  </data>
+  <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent:" xml:space="preserve">
+    <value>The "Lines" tab is used to select the lines your are interested in</value>
+  </data>
+  <data name="L'onglet &quot;Sélection&quot; vous permet choisir la direction et la variante sélectionnée pour chaque ligne" xml:space="preserve">
+    <value>The "Selection" tab is used to choose the direction and the variation for each line</value>
+  </data>
+  <data name="L'onglet &quot;Véhicules&quot; vous permet d'afficher la liste des véhicules ayant un capteur" xml:space="preserve">
+    <value>The "Vehicles" tab contains the list of the vehicle which have a sensor</value>
+  </data>
+  <data name="La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur" xml:space="preserve">
+    <value>The search can be made by name, by stock number or by sensor ID</value>
+  </data>
+  <data name="Les prochaines horaires de passage des correspondances sont aussi affichées" xml:space="preserve">
+    <value>The next stop times for the connections are also displayed</value>
+  </data>
+  <data name="Lignes" xml:space="preserve">
+    <value>Lines</value>
+  </data>
+  <data name="Lignes Grisées" xml:space="preserve">
+    <value>Shade lines</value>
+  </data>
+  <data name="Lignes Masquées" xml:space="preserve">
+    <value>Hide lines</value>
+  </data>
+  <data name="Masquer cette catégorie" xml:space="preserve">
+    <value>Hide this category</value>
+  </data>
+  <data name="Masquer les véhicules" xml:space="preserve">
+    <value>Hide the vehicles</value>
+  </data>
+  <data name="Non Renseigné" xml:space="preserve">
+    <value>Not Known</value>
+  </data>
+  <data name="Paramètres personnels" xml:space="preserve">
+    <value>Personal settings</value>
+  </data>
+  <data name="Partie carte" xml:space="preserve">
+    <value>Map area</value>
+  </data>
+  <data name="Partie menu" xml:space="preserve">
+    <value>Menu area</value>
+  </data>
+  <data name="pas de prédiction de charge" xml:space="preserve">
+    <value>no load prediction</value>
+  </data>
+  <data name="pas de signal reçu depuis 5min" xml:space="preserve">
+    <value>no received signal since 5min</value>
+  </data>
+  <data name="pas de signal reçu depuis plus de 10min" xml:space="preserve">
+    <value>no received signal since more than 10min</value>
+  </data>
+  <data name="Plus de passage aujourd'hui" xml:space="preserve">
+    <value>No more stop today</value>
+  </data>
+  <data name="Rechercher parmi les véhicules" xml:space="preserve">
+    <value>Search among the vehicles</value>
+  </data>
+  <data name="statut du véhicule inconnu" xml:space="preserve">
+    <value>unknown vehicle status</value>
+  </data>
+  <data name="statut OK" xml:space="preserve">
+    <value>OK status</value>
+  </data>
+  <data name="Supprimer toutes les lignes sélectionnées" xml:space="preserve">
+    <value>Remove all selected lines</value>
+  </data>
+  <data name="Sélection" xml:space="preserve">
+    <value>Selection</value>
+  </data>
+  <data name="Utilisez le champ correspondant pour rechercher parmi les véhicules." xml:space="preserve">
+    <value>Use the search field to search among the vehicles.</value>
+  </data>
+  <data name="Véhicules" xml:space="preserve">
+    <value>Vehicles</value>
+  </data>
+  <data name="[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)" xml:space="preserve">
+    <value>[sensor ID]: sensor status see above for the status colors meaning)</value>
+  </data>
+</root>

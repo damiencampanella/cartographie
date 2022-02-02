@@ -1,0 +1,14 @@
+﻿@namespace BlazorFlowly.Components
+
+<AntDesign.Tooltip OverlayStyle="pointer-events:none;" MouseLeaveDelay="0" MouseEnterDelay="0" Placement=@Placement Title="@Title">
+    @ChildContent
+</AntDesign.Tooltip>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public Placement Placement { get; set; }
+}

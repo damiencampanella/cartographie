@@ -1,0 +1,1453 @@
+﻿@namespace BlazorFlowly.Pages.Cartographie
+
+@using BlazorLeaflet.Models.Events
+@using BlazorLeaflet.Models;
+@using BlazorFlowly.Components;
+@using System.Globalization
+@using System.Timers
+@using System.Diagnostics
+
+@inject IJSRuntime jsRuntime
+@inject IMapDataService MapDataService
+@inject IPositionsDataService PositionsDataService
+@inject IStopTimesDataService StopTimesDataService
+@inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
+@if (DisplayMenu) {
+    @if (mapInitializationDone) {
+    string tabsStyle = "";
+    <Tabs Style=@tabsStyle @bind-ActiveKey="@siderTabsActiveKey">
+        <TabPane Key="1">
+            <TabTemplate>
+                <span><AntDesign.Icon Type="branches" Theme="outline"/>@GetLocalizedString("Lignes")</span>
+            </TabTemplate>
+            <ChildContent>
+                @{
+                    string lineDivString;
+                    if(isMobileView) {
+                        lineDivString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden;";
+                    }
+                    else {
+                        lineDivString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                    }
+                      
+                    <div style=@lineDivString>
+                        @if(CollapsedSider) {
+                            foreach (LineSelection selectedLine in SelectedLines){
+                                Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                                <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
+                                    <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
+                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
+                                                OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                        </Button>
+                                    </div>
+                                </TooltipComponent>
+                            }
+                        }
+                        else {
+                            string previousCategory, categoryString;
+                            if (apiMap.Lines[0].Category != "") {
+                                previousCategory = apiMap.Lines[0].Category;
+                                categoryString = @GetLocalizedString("Lignes") + " " + RemoveLineFromString(previousCategory); 
+                            }
+                            else {
+                                previousCategory = "";
+                                categoryString = @GetLocalizedString("Lignes");
+                            }
+                            <div style="padding: 0pt 10pt 0pt 10pt">
+                                <div class="ant-row" style="margin-left: -8px; margin-right: -8px; row-gap: 16px">
+                                    <AntDesign.Col Span="24">
+                                        <div><b style="padding: 8pt;position: relative; top: 5pt">@categoryString</b></div>
+                                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: 20%;" Size="Small" OnClick="() => ToggleCategoryHide(0)">
+                                            <ChildContent>
+                                                @if (categoryHide[0]) {
+                                                    <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
+                                                        <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                                    </TooltipComponent>
+                                                }
+                                                else {
+                                                    <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
+                                                        <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                                    </TooltipComponent>
+                                                }
+                                            </ChildContent>
+                                        </Button>
+                                    </AntDesign.Col>
+
+                                    @foreach (LineSelection selectedLine in SelectedLines){
+                                        Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                                        @if(line.Category != previousCategory){
+                                            int categoryIndex = selectedLine.CategoryIndex;
+                                            <AntDesign.Col Span="24">
+                                                @if (line.Category != "") {
+                                                    categoryString = @GetLocalizedString("Lignes") + " " + RemoveLineFromString(line.Category);
+                                                    <div><b style="@(LineCategoryFormattingString())">@categoryString</b></div>
+                                                }
+                                                else{
+                                                    <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
+                                                }
+                                                <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(categoryIndex)">
+                                                    <ChildContent>
+                                                        @if (categoryHide[categoryIndex]) {
+                                                            <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
+                                                                <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                                            </TooltipComponent>
+                                                        }
+                                                        else {
+                                                            <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
+                                                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                                            </TooltipComponent>
+                                                        }
+                                                    </ChildContent>
+                                                </Button>
+                                            </AntDesign.Col>
+                                            previousCategory = line.Category;
+                                        }
+                                        <AntDesign.Col Span="8">
+                                            <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
+                                                <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
+                                                    <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
+                                                            OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                                    </Button>
+                                                </div>
+                                            </TooltipComponent>
+                                        </AntDesign.Col>
+
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                @if (!CollapsedSider){
+                    <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=ToggleLineRemoval>
+                        <ChildContent>
+                            @if (removeLines){
+                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                <span class="carto_button_text">@GetLocalizedString("Lignes Masquées")</span>
+                            }
+                            else{
+                                <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                <span class="carto_button_text">@GetLocalizedString("Lignes Grisées")</span>
+                            }
+                        </ChildContent>
+                    </Button>
+                }
+            </ChildContent>
+        </TabPane>
+        @if (!CollapsedSider) {
+            <TabPane Key="2">
+                <TabTemplate>
+                    <span><AntDesign.Icon Type="unordered-list" Theme="outline"/>@GetLocalizedString("Sélection")</span>
+                </TabTemplate>
+                <ChildContent>
+                    @{
+                        string selectionDivString;
+                        if(isMobileView) {
+                            selectionDivString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden;";
+                        }
+                        else {
+                            selectionDivString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                        }
+                      
+                        <div style=@selectionDivString>
+                            @foreach (LineSelection selectedLine in SelectedLines){
+                                @if(selectedLine.Display){
+                                    Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                                    Flowly.Api.Map.ApiVariation selectedVariation = line.Roads[selectedLine.Direction].Variations[selectedLine.VariationNumber];
+                                    string linkStyle = $"font-size: 12pt; color: black; display: inline-block; width: 140pt; vertical-align: middle;";
+                                    string divStyle = $"word-spacing: {lineSelectionWordSpacing}px;";
+                                    <div style=@divStyle>
+                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, true, 70))" 
+                                                        OnClick="() => ToggleSelectedLineDevelopment(selectedLine)">
+                                            @RemoveLineFromString(line.Id)
+                                        </Button>
+                                        <a href="" @onclick="@(() => ToggleSelectedLineDevelopment(selectedLine))" @onclick:preventDefault style=@linkStyle>@selectedVariation.Description</a>
+                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Changer de direction")">
+                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small" OnClick="() => ChangeSelectedLineDirection(selectedLine)">
+                                                @if (selectedLine.Direction == 0) {
+                                                    <AntDesign.Icon Type="arrow-right" Theme="outline"/>
+                                                }
+                                                else {
+                                                    <AntDesign.Icon Type="arrow-left" Theme="outline"/>
+                                                }
+                                            </Button>
+                                        </TooltipComponent>
+                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Enlever de la sélection")">
+                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small" OnClick="() => RemoveSelectedLineFromDisplay(selectedLine)">
+                                                <AntDesign.Icon Type="close" Theme="outline"/>
+                                            </Button>
+                                        </TooltipComponent>
+                                    </div>
+                                    @if((selectedLine != SelectedLines[SelectedLines.Length-1]) && !selectedLine.Develop) {
+                                        <Divider Style="margin: 10pt 0" />
+                                    }
+                                    @if (selectedLine.Develop) {
+                                        Flowly.Api.Map.ApiRoad selectedRoad = line.Roads[selectedLine.Direction];
+                                        @if (selectedRoad.Variations.Length > 1) {
+                                            <AntDesign.Row Gutter="(8, 8)" Justify="space-around" Align="middle">
+                                                @foreach (Flowly.Api.Map.ApiVariation variation in selectedRoad.Variations) {
+                                                    <AntDesign.Col>
+                                                        <Button Style="@(VariantButtonFormattingString(line.ForeColor, line.Color, 1.0f - ((float)variation.Id / (float)selectedRoad.Variations.Length)))"
+                                                                    OnClick="() => ChangeSelectedVariation(selectedLine, variation.Id)">
+                                                            @variation.Description
+                                                        </Button>
+                                                    </AntDesign.Col>
+                                                }
+                                            </AntDesign.Row>
+                                        }
+                                        <ul class="station-list">
+                                            @foreach (var stationRef in selectedVariation.Stations) {
+                                                Flowly.Api.Map.ApiStation station = stationsDict[stationRef.Id];
+                                                int stationIndex = Array.IndexOf(selectedVariation.Stations, stationRef);
+                                                string spanStyle = $"background-color:#{line.Color}; position:absolute; top:0; bottom:0;";
+                                                @if(stationRef == selectedVariation.Stations[0]) {
+                                                    spanStyle += "border-radius: 3px 3px 0px 0px";
+                                                }
+                                                @if(stationRef == selectedVariation.Stations[selectedVariation.Stations.Length - 1]) {
+                                                    spanStyle += "border-radius: 0px 0px 3px 3px";
+                                                }
+                                                <li class="station-list-item" @onmouseover="() => StationMouseOverEvent(selectedLine, stationIndex)" 
+                                                            @onmouseout="() => StationMouseOutEvent(selectedLine, stationIndex)">
+
+                                                    <span style=@spanStyle><i style="color: white; font-size:7pt; margin: 3pt 3pt;" class="fas fa-circle"></i></span>
+                                                    <span style="position: relative; left: 20pt" >@station.Name</span>
+                                                    @foreach(var connectingLine in apiMap.Lines.Reverse()) {
+                                                        if(stationsConnectionDict[stationRef.Id].Contains(connectingLine.Id) && (connectingLine.Id != selectedLine.LineId)) {
+                                                            Flowly.Api.Map.ApiLine correspondingLine = linesDict[connectingLine.Id];
+                                                            <Button Style="@(LineIconFormattingString(correspondingLine.ForeColor, correspondingLine.Color, 22, 18))">
+                                                                @RemoveLineFromString(connectingLine.Id)
+                                                            </Button>  
+                                                        }
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                        <Divider />
+                                    } @* if *@
+                                } @* if *@
+                            } @* foreach *@
+                        </div>
+                    }
+                    <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=HideAllSelectedLines>
+                        <ChildContent>
+                            <AntDesign.Icon Class="carto_button_icon" Type="close" Theme="outline"/>
+                            <span class="carto_button_text">@GetLocalizedString("Supprimer toutes les lignes sélectionnées")</span>
+                        </ChildContent>
+                    </Button>
+                </ChildContent>
+            </TabPane>
+            @if (DisplayVehicles) {            
+                <TabPane Key="3">
+                    <TabTemplate>
+                        <span><AntDesign.Icon Type="environment" Theme="outline"/>@GetLocalizedString("Véhicules")</span>
+                    </TabTemplate>
+                    <ChildContent>
+                        @if(vehicleInitializationDone) {
+                            string vehicleDivStyleString;
+                            if(isMobileView) {
+                                vehicleDivStyleString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden; display: block";
+                            }
+                            else {
+                                vehicleDivStyleString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                            }
+                            <div style=@vehicleDivStyleString>
+                                <Search Placeholder=@GetLocalizedString("Rechercher parmi les véhicules") AllowClear WrapperStyle="width: 100%;" 
+                                        @bind-Value="@vehicleFilteringString" OnChange="() => FilterVehicles()"/>
+
+                                @foreach (var position in filteredPositions) {
+                                    int layerIndex = Array.IndexOf(filteredPositions, position);
+                                    <div @onmouseenter="() => VehicleMouseEnterEvent(layerIndex)" @onmouseleave="() => VehicleMouseLeaveEvent(layerIndex)">
+                                        <Button Block Style="text-align: left; height: auto; border-radius: 5px;" OnClick="() => VehicleClickEvent(position)">
+                                            <ChildContent>
+                                                <span>
+                                                    <span ><i style="@StateCircleFormattingString(position.State, 6)" class="fas fa-circle"></i>
+                                                        <i style="color: black; font-size: 10pt;" class=@position.Icon></i></span>
+                                                    @if((position.Vehicle != null) && (position.VehicleId != null)) {
+                                                        <b style="font-size: 12pt;">@position.Vehicle</b>
+                                                        <span style="font-size: 12pt;">(@position.VehicleId)</span>
+                                                    }
+                                                    else {
+                                                        <span style="font-size: 12pt;">@GetLocalizedString("Non Renseigné")</span>
+                                                    }
+                                                    @foreach (ApiDevice device in position.Devices) {
+                                                        string spanContent = $"{device.DeviceId}";
+                                                        <div style="margin:0;"><i style="@StateCircleFormattingString(device.State, 4)" class="fas fa-circle"></i>
+                                                        <span style="font-size:9pt; word-spacing:4pt;">@spanContent</span></div>
+                                                    }
+                                                 </span>
+                                                 <span style="position: relative;"><i style="@PeopleIconFormattingString(position.Load)" class="fas fa-users"></i></span>
+                                            </ChildContent>
+                                        </Button>
+                                    </div>
+                                } @* foreach *@
+                            </div>
+                            <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=ToggleVehiclesDisplay>
+                                <ChildContent>
+                                    @if (hideVehicles){
+                                        <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                        <span class="carto_button_text">@GetLocalizedString("Afficher les véhicules")</span>
+                                    }
+                                    else{
+                                        <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                        <span class="carto_button_text">@GetLocalizedString("Masquer les véhicules")</span>
+                                    }
+                                </ChildContent>
+                            </Button>
+                        }
+                        else
+                        {
+                            <b>@GetLocalizedString("Accès à la position des véhicules impossible")</b>
+                        }
+                    </ChildContent>
+                </TabPane>
+
+            } @* if *@
+        }
+    </Tabs>
+    }
+    else
+    {
+        <div style="text-align: center;"><b> @GetLocalizedString("Chargement des données de cartographie") </b></div>
+        <div style="text-align: center;"><Spin/></div>
+    }  
+}
+
+
+@code {
+    [Parameter]
+    public CartographieComponent Parent  { get; set; }
+    [Parameter]
+    public bool CollapsedSider { get; set; } = false;
+    [Parameter]
+    public bool DisplayVehicles { get; set; } = true;
+    [Parameter]
+    public bool DisplayMenu { get; set; } = true;
+    [Parameter]
+    public bool DisplayOneLine { get; set; } = false;
+    [Parameter]
+    public string LineToDisplay { get; set; } = "";
+    [Parameter]
+    public int DirectionToDisplay { get; set; } = 0;
+    [Parameter]
+    public int VariantToDisplay { get; set; } = 0;
+
+    private bool isMobileView;
+    private int lineButtonWidth;
+    private int menuWidth;
+    private int windowHeight;
+
+    private string lineSelectionWordSpacing;
+
+    private bool mapInitializationDone = false;
+    private bool vehicleInitializationDone = false;
+
+    const int NUMBER_LAYERS_POLYLINE =  3;
+    const int NUMBER_DISPLAYED_STOPTIMES = 3;
+
+
+    private ApiMap apiMap = null;
+    private ApiPositions apiPositions = null;
+    private ApiStopTimes apiStopTimes = null;
+    private Dictionary<string,Flowly.Api.Map.ApiStation> stationsDict;
+    private Dictionary<string, HashSet<string>> stationsConnectionDict;
+    private Dictionary<string,Flowly.Api.Map.ApiLine> linesDict;
+    private Layer[] vehicleLayers;
+    private BlazorLeaflet.Models.Icon stationIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Station.png", Width = 10, Height = 10};
+    private BlazorLeaflet.Models.Icon terminusIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Terminus.png", Width = 10, Height = 10};
+    public LineSelection[] SelectedLines { get; set; }
+    private Dictionary<string, Layer[]> lineLayersDict = new();
+    private Dictionary<string, ApiStopTime[]> stopTimesDict;  // "LineId Direction VariationId StationId" -> StopTimes
+    private bool hideVehicles;
+    private bool removeLines = true;
+    private string siderTabsActiveKey = "1";
+    private string vehicleFilteringString = "";
+    private ApiPosition[] filteredPositions;
+    private bool[] categoryHide;
+
+    #if DEBUG
+    private Stopwatch stopWatch;
+    #endif
+
+
+    protected override async Task OnInitializedAsync(){
+        #if DEBUG
+    stopWatch = Stopwatch.StartNew();
+        #endif
+
+        await base.OnInitializedAsync();
+
+        isMobileView = Parent.isMobileView;
+        lineButtonWidth = Parent.lineButtonWidth;
+        lineSelectionWordSpacing = Parent.lineSelectionWordSpacing;
+        menuWidth = Parent.menuWidth;
+        windowHeight = Parent.WindowHeight;
+
+
+        Task<ApiStopTimes> stopTimesTask = null;
+        Task<ApiMap> mapTask = null;
+        Task<ApiPositions> positionsTask = null;
+        try
+        {
+            stopTimesTask = Task.Run<ApiStopTimes>(StopTimesDataService.GetApiStopTimesDataAsync);  
+
+            mapTask = Task.Run<ApiMap>(MapDataService.GetApiMapDataAsync);  
+
+            if(DisplayVehicles) {
+                positionsTask = Task.Run<ApiPositions>(PositionsDataService.GetApiPositionsDataAsync);
+            }
+
+            apiStopTimes = await stopTimesTask;
+
+            #if DEBUG
+    stopWatch.Stop();
+    long milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken to fetch stoptimes data: {0} milliseconds", milliSec);
+    stopWatch.Restart();
+            #endif
+
+            if (apiStopTimes != null) {
+                stopTimesDict = new(apiStopTimes.Lines.Length*apiStopTimes.Lines[0].Roads.Length*60); //60: arbitrary number to initialize the dict size
+                foreach (Flowly.Api.StopTimes.ApiLine line in apiStopTimes.Lines) {
+                    foreach (Flowly.Api.StopTimes.ApiRoad road in line.Roads) {
+                        foreach (Flowly.Api.StopTimes.ApiVariation variation in road.Variations) {
+                            foreach (Flowly.Api.StopTimes.ApiStation station in variation.Stations) {
+                                string key = $"{line.Id} {road.Direction} {variation.Id} {station.Id}";
+                                stopTimesDict.Add(key, station.StopTimes);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                Console.WriteLine("Error trying to get the stop times data, No stop times will be displayed.");
+            }
+
+            #if DEBUG
+    stopWatch.Stop();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken to initialize stoptimes: {0} milliseconds", milliSec);
+    stopWatch.Restart();
+            #endif
+
+            apiMap = await mapTask;
+
+            #if DEBUG
+    stopWatch.Stop();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken to fetch Map data: {0} milliseconds", milliSec);
+    stopWatch.Restart();
+            #endif
+
+            if (apiMap != null) {
+                //Fill dictionnaries
+                stationsDict = new(apiMap.Stations.Length);
+                stationsConnectionDict = new(apiMap.Stations.Length);
+                foreach (Flowly.Api.Map.ApiStation station in apiMap.Stations) {
+                    stationsDict.Add(station.Id, station);
+                    stationsConnectionDict[station.Id] = new();
+                }
+                linesDict = new(apiMap.Lines.Length);
+                foreach (Flowly.Api.Map.ApiLine line in apiMap.Lines) {
+                    linesDict.Add(line.Id, line);
+                }
+
+                //Fill the selected lines structure with the variant 0 and direction 0 of all lines (which is the default value for these properties)
+                if(DisplayOneLine) {
+                    SelectedLines = new LineSelection[1];
+                    var line = linesDict[LineToDisplay];
+                    SelectedLines[0] = new LineSelection { LineId = line.Id, Display=line.Display, Direction=DirectionToDisplay, VariationNumber=VariantToDisplay};
+                }
+                else {
+                    int index = 0;
+                    SelectedLines = new LineSelection[apiMap.Lines.Length];
+                    foreach (var line in apiMap.Lines)
+                    {
+                        SelectedLines[index++] = new LineSelection { LineId = line.Id, Display=line.Display };
+                    }
+                }
+
+
+                // Initialize bounds
+                if(DisplayOneLine) {
+                    Flowly.Api.Map.ApiLine line = linesDict[LineToDisplay];
+                    Flowly.Api.Map.ApiVariation variant = line.Roads[DirectionToDisplay].Variations[VariantToDisplay];
+                    Single[] bounds = StringUtils.ExtractBoundsFromString(variant.Bounds);
+                    Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
+                }
+                else {
+                    Single[] bounds = StringUtils.ExtractBoundsFromString(apiMap.Bounds);
+                    Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
+                }
+
+
+                //map.AddLayer(new TileLayer
+                //{
+                //    UrlTemplate = "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                //    Attribution = "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+                //});
+
+                Parent.map.AddLayer(new TileLayer
+                    {
+                        UrlTemplate = "https://api.mapbox.com/styles/v1/mapbox/streets-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoianNrdXphIiwiYSI6ImNpcmMyY28xNjAwNm5pZm5uYmd4NW5iOWUifQ.nIpza_SQ3UblVaMg-md2-A",
+                        Attribution = "Données &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a>, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagerie &copy; <a href=\"http://mapbox.com\">Mapbox</a>",
+                    });
+
+                ScaleOptions scaleOptions = new() { Imperial=false };
+                Parent.map.AddScale(scaleOptions);
+
+                #if DEBUG
+        stopWatch.Stop();
+        milliSec = stopWatch.ElapsedMilliseconds;
+        Console.WriteLine("  Total time taken to initialize the map: {0} milliseconds", milliSec);
+        stopWatch.Restart();
+                #endif
+
+                // Display all lines
+                foreach (var selectedLine in SelectedLines)
+                {
+                    DisplaySelectedLineFirstTime(selectedLine, false);
+                }
+
+                int numberCategories = InitializeCategories();
+                categoryHide = new bool[numberCategories];
+                Array.Fill(categoryHide, false);
+
+                mapInitializationDone = true;
+            }
+            else {
+                Console.WriteLine("Error trying to get the map data, please try again later");
+            }
+
+            #if DEBUG
+    stopWatch.Stop();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken for the lines configuration: {0} milliseconds", milliSec);
+    stopWatch.Restart();
+            #endif
+            if(DisplayVehicles) {
+                apiPositions = await positionsTask;
+
+                #if DEBUG
+        stopWatch.Stop();
+        milliSec = stopWatch.ElapsedMilliseconds;
+        Console.WriteLine("  Total time to fetch the vehicle positions: {0} milliseconds", milliSec);
+        stopWatch.Restart();
+                #endif
+
+                if((apiPositions != null) && (apiPositions.Positions != null))
+                {
+                    vehicleLayers = new Layer[apiPositions.Positions.Length];
+                    DisplayAllVehicles();
+                    filteredPositions = new ApiPosition[apiPositions.Positions.Length];
+                    FilterVehicles();
+                    vehicleInitializationDone = true;
+                }
+                else {
+                    Console.WriteLine("Error trying to get the vehicle positions, no vehicle will be displayed");
+                }
+            }
+
+            #if DEBUG
+    stopWatch.Stop();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken to initialize the vehicle positions: {0} milliseconds", milliSec);
+            #endif
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception during the initialization, Message: " + ex.Message);
+        }
+
+        // Timer to reload real time data every minute
+        Timer reloadRealTimeTimer = new Timer(60000);
+        reloadRealTimeTimer.Elapsed += ReloadRealTimeEvent;
+        reloadRealTimeTimer.Enabled = true;  
+    }
+
+    private int InitializeCategories() {
+        int numberCategories = 0;
+        string previousCategory = apiMap.Lines[0].Category;
+        foreach (LineSelection selectedLine in SelectedLines){
+            Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+            if(line.Category != previousCategory) {
+                numberCategories++;
+                previousCategory = line.Category;
+            }
+            selectedLine.CategoryIndex = numberCategories;
+        }
+        return numberCategories+1;
+    }
+
+
+    private void ReloadRealTimeEvent(object source, ElapsedEventArgs e) {
+        Task.Run(async () => await ReloadRealTimeTask());
+    }
+
+    private async Task ReloadRealTimeTask() {
+        if(DisplayVehicles) {
+            try {
+                apiPositions = await PositionsDataService.GetApiPositionsDataAsync();
+
+                if ((apiPositions != null) && (apiPositions.Positions != null)) {
+                    if (!hideVehicles)
+                    {
+                        RemoveAllVehicles();
+                        Array.Resize(ref vehicleLayers, apiPositions.Positions.Length);
+                        DisplayAllVehicles();
+                        Array.Resize(ref filteredPositions, apiPositions.Positions.Length);
+                        FilterVehicles();
+                    }
+                    vehicleInitializationDone = true;
+                }
+                else {
+                    vehicleInitializationDone = false;
+                }  
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception during the vehicle initialization, no vehicle will be displayed. Message: " + ex.Message + ex.StackTrace);
+                vehicleInitializationDone = false;
+            }
+        }
+
+        try
+        {
+            apiStopTimes = await StopTimesDataService.GetApiStopTimesDataAsync();
+            if (apiStopTimes != null) {
+                //Update stopTimesDict
+                stopTimesDict.Clear();
+                foreach (Flowly.Api.StopTimes.ApiLine line in apiStopTimes.Lines) {
+                    foreach (Flowly.Api.StopTimes.ApiRoad road in line.Roads) {
+                        foreach (Flowly.Api.StopTimes.ApiVariation variation in road.Variations) {
+                            foreach (Flowly.Api.StopTimes.ApiStation station in variation.Stations) {
+                                string key = $"{line.Id} {road.Direction} {variation.Id} {station.Id}";
+                                stopTimesDict.Add(key, station.StopTimes);
+                            }
+                        }
+                    }
+                }
+                // Clear Connecting lines as it will be refilled with the next function
+                foreach (Flowly.Api.Map.ApiStation station in apiMap.Stations) {
+                    stationsConnectionDict[station.Id].Clear();
+                }
+                // Update the content of the station Popups
+                foreach (LineSelection selectedLine in SelectedLines) {
+                    Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                    Flowly.Api.Map.ApiVariation selectedVariation = line.Roads[selectedLine.Direction].Variations[selectedLine.VariationNumber];
+                    int stationLayerIndex = NUMBER_LAYERS_POLYLINE;
+                    foreach (var stationRef in selectedVariation.Stations) {
+                        Layer[] layers = lineLayersDict[line.Id];
+                        Layer stationLayer = layers[stationLayerIndex++];
+                        CreateStationPopupContent(selectedLine, stationRef.Id);
+                        Parent.map.UpdatePopupContent(stationLayer);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception during the stop times initialization, no stop times will be displayed. Message: " + ex.Message);
+        }
+        StateHasChanged();
+    }
+
+    private void DisplaySelectedLineFirstTime(LineSelection selectedLine, bool greyPolyline) {
+        if (!lineLayersDict.ContainsKey(selectedLine.LineId)) {
+            Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+            Flowly.Api.Map.ApiVariation selectedVariation = line.Roads[selectedLine.Direction].Variations[selectedLine.VariationNumber];
+            string color = line.Color;
+            double opacity = 1.0;
+            if (greyPolyline) {
+                color = "D5D9DC";
+                opacity = 0.5;
+            }
+
+            int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
+            int weight = line.Weight;
+
+            // Display the shape of the line variant
+            PointF[][] shape = new PointF[1][];
+            int shapeSize = selectedVariation.Shape.Count();
+            shape[0] = new PointF[shapeSize];
+            for (int i = 0; i<shapeSize; i++) {
+                shape[0][i] = new PointF((float)selectedVariation.Shape[i][0], (float)selectedVariation.Shape[i][1]);
+            }
+            Layer[] lineLayers = new Layer[selectedVariation.Stations.Length+NUMBER_LAYERS_POLYLINE];
+            var polyLineBorders = new Polyline {
+                Shape = shape,
+                Fill = false,
+                StrokeWidth = weight + 5,
+                StrokeOpacity = 0.5,
+                StrokeColor = System.Drawing.Color.Black,
+                NoClipEnabled = false
+            };
+            Parent.map.AddLayer(polyLineBorders);
+            lineLayers[0] = polyLineBorders;
+
+            var polyLineMask = new Polyline {
+                Shape = shape,
+                Fill = false,
+                StrokeWidth = weight + 3,
+                StrokeColor = System.Drawing.Color.White,
+                NoClipEnabled = false
+            };
+            Parent.map.AddLayer(polyLineMask);
+            lineLayers[1] = polyLineMask;
+
+            var polyLine = new Polyline {
+                Shape = shape,
+                Fill = false,
+                StrokeWidth = weight + 3,
+                StrokeColor = System.Drawing.Color.FromArgb(colorInt),
+                StrokeOpacity = opacity,
+                NoClipEnabled = false,
+                Tooltip = new BlazorLeaflet.Models.Tooltip { 
+                    IsSticky = true, 
+                    Content = $"<Button Style=\"{LineIconFormattingString(line.ForeColor, line.Color, 30, 20)}\">{RemoveLineFromString(line.Id)}</Button>" }             
+            };
+            Parent.map.AddLayer(polyLine);
+            lineLayers[2] = polyLine;
+
+            // Display all stations of the line variant
+            int layerIndex = NUMBER_LAYERS_POLYLINE;
+            foreach (var stationRef in selectedVariation.Stations) {
+                Flowly.Api.Map.ApiStation station = stationsDict[stationRef.Id];
+                BlazorLeaflet.Models.Icon icon = (station.Terminus) ? terminusIcon : stationIcon;
+                string popupContent = CreateStationPopupContent(selectedLine, stationRef.Id);
+                var stationMarker = new Marker((float)station.Latitude, (float)station.Longitude) {
+                    Icon = icon,
+                    Popup = new Popup {
+                        Content = popupContent,
+                        KeepInView = true,
+                        ShowCloseButton = false
+                    }
+                };
+                Parent.map.AddLayer(stationMarker);
+                lineLayers[layerIndex++] = stationMarker;
+            } //foreach
+            lineLayersDict.Add(selectedLine.LineId, lineLayers);
+        } //if
+    }
+
+    private string CreateStationPopupContent(LineSelection selectedLine, string stationId) {
+        bool stopTimesFound;
+        Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+        Flowly.Api.Map.ApiStation station = stationsDict[stationId];
+        string key = $"{selectedLine.LineId} {selectedLine.Direction} {selectedLine.VariationNumber} {stationId}";
+
+        string stationPopupString = $"<div style= \"font-size: 9pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:0.4rem;" +
+                $"justify-content:center; text-align: center; margin:10pt 0pt;\">{station.Name}</div>" +
+                GetStopTimesLineString(line, key, out stopTimesFound);
+
+        foreach(var connectingLine in apiMap.Lines) {
+            if ((connectingLine.Id != selectedLine.LineId) && IsAmongTheStationConnectingLines(station, connectingLine.Id)) {
+                string connectingStationId;
+                int direction, variationNumber;
+                LineSelection connectingSelectedLine = GetConnectingSelectedLine(connectingLine.Id);
+                if (connectingSelectedLine != null) {
+                    direction = connectingSelectedLine.Direction;
+                    variationNumber = connectingSelectedLine.VariationNumber;
+                }
+                else {
+                    //Values by default
+                    direction = 0;
+                    variationNumber = 0;
+
+                }
+
+                Flowly.Api.Map.ApiRoad selectedRoad = connectingLine.Roads[direction];
+                stopTimesFound = StationAvailableInVariation(selectedRoad.Variations[variationNumber], station.Name, out connectingStationId);
+                if (!stopTimesFound) {
+                    // Check in selected direction if a variation contains the target station
+                    foreach(var variation in selectedRoad.Variations) {
+                        if(variation.Id != variationNumber) {
+                            if(StationAvailableInVariation(variation, station.Name, out connectingStationId)) {
+                                variationNumber = variation.Id;
+                                stopTimesFound = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!stopTimesFound) {
+                    // Check in the opposite direction if a variation contains the target station
+                    if (direction == 0) {
+                        direction = 1;
+                    }
+                    else {
+                        direction = 0;
+                    }
+                    selectedRoad = connectingLine.Roads[direction];
+                    foreach(var variation in selectedRoad.Variations) {
+                        if(StationAvailableInVariation(variation, station.Name, out connectingStationId)) {
+                            variationNumber = variation.Id;
+                            stopTimesFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(stopTimesFound) {
+                    key = $"{connectingLine.Id} {direction} {variationNumber} {connectingStationId}";
+                    string lineString = GetStopTimesLineString(connectingLine, key, out stopTimesFound);
+                    if(stopTimesFound) {
+                        stationPopupString += lineString;
+                        stationsConnectionDict[stationId].Add(connectingLine.Id);
+                    }
+                }  
+            }
+        }
+        return stationPopupString;
+    }
+
+    private void ToggleCategoryHide(int categoryIndex) {
+        if(categoryHide[categoryIndex]) {
+            categoryHide[categoryIndex] = false;
+            foreach( var selectedLine in SelectedLines)
+            {
+                if (selectedLine.CategoryIndex == categoryIndex)
+                {
+                    DisplaySelectedLine(selectedLine, false);
+                    selectedLine.Display = true;
+                }
+            }
+        }
+        else {
+            categoryHide[categoryIndex] = true;
+            foreach( var selectedLine in SelectedLines)
+            {
+                if (selectedLine.CategoryIndex == categoryIndex)
+                {
+                    HideSelectedLine(selectedLine);
+                    selectedLine.Display = false;
+                    selectedLine.Develop = false;
+                }
+            }
+        }
+        StateHasChanged();
+    }
+
+    private LineSelection GetConnectingSelectedLine(string Id) {
+        foreach (var lineSelection in SelectedLines) {
+            if (lineSelection.LineId == Id) {
+                return lineSelection;
+            }
+        }
+        return null;
+    }
+
+    private bool IsAmongTheStationConnectingLines(Flowly.Api.Map.ApiStation station, string LineId) {
+        bool idFound = false;
+        foreach (var line in station.Lines) {
+            if (line.Id == LineId) {
+                idFound = true;
+            }
+        }
+        return idFound;
+    }
+    private bool StationAvailableInVariation(Flowly.Api.Map.ApiVariation variation, string stationName, out string stationId) {
+        bool stationFound = false;
+        stationId = "";
+        foreach (var stationRef in variation.Stations) {
+            Flowly.Api.Map.ApiStation station = stationsDict[stationRef.Id];
+            if (station.Name == stationName) {
+                stationFound = true;
+                stationId = station.Id;
+            }
+        }
+        return stationFound;
+    }
+
+    private string GetStopTimesLineString(Flowly.Api.Map.ApiLine line, string key, out bool stopTimesFound) {
+        ApiStopTime[] stopTimes = null;
+        stopTimesDict.TryGetValue(key, out stopTimes);
+        string stopTimesHtmlString = "";
+        if (stopTimes != null) {
+            for (int stopTimeIndex = 0; stopTimeIndex<(stopTimes.Length-1); stopTimeIndex++) {
+                stopTimesHtmlString += GetSingleStopTimeString(stopTimes[stopTimeIndex]) + " | ";
+            }
+            stopTimesHtmlString += GetSingleStopTimeString(stopTimes[stopTimes.Length-1]);
+            stopTimesFound = true;
+        } //if
+        else {
+            stopTimesHtmlString = GetLocalizedString("Plus de passage aujourd'hui");
+            stopTimesFound = false;
+        }
+        return $"<div><Button Style=\"color: #{line.ForeColor}; background: #{line.Color}; width: {lineButtonWidth*6/10}px; height: 20pt;" +
+               $"border-style: none; border-radius: 5px; margin-top:3pt;\"> {RemoveLineFromString(line.Id)}</Button>" + stopTimesHtmlString +"</div>";
+    }
+
+    private string GetSingleStopTimeString(ApiStopTime stopTime) {
+        return $"<b> {FormatPassingTime(stopTime.PassingTime)} </b>" +
+               $"{GetPopupLoadIcon(GetLoadColor(stopTime.Load))}" +
+               $"{GetPopupRealTimeIcon(stopTime.IsRealTime)}";
+    }
+
+    private void RemoveSelectedLine(LineSelection selectedLine) {
+        if(lineLayersDict.ContainsKey(selectedLine.LineId)) {
+            Layer[] layers = lineLayersDict[selectedLine.LineId];
+            foreach(Layer layer in layers){
+                Parent.map.RemoveLayer(layer);
+            }
+            lineLayersDict.Remove(selectedLine.LineId); 
+        }
+    }
+
+    private void DisplaySelectedLine(LineSelection selectedLine, bool greyPolyline) {
+        if(lineLayersDict.ContainsKey(selectedLine.LineId)) {
+            Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+            string color = line.Color;
+            double opacity = 1.0;
+            if (greyPolyline) {
+                color = "D5D9DC";
+                opacity = 0.5;
+            }
+            int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
+            int weight = line.Weight;
+
+            Layer[] layers = lineLayersDict[selectedLine.LineId];
+            int nbLayers = layers.Length;
+
+            Path polyLineBorders = (Path)layers[0];
+            polyLineBorders.Fill = false;
+            polyLineBorders.StrokeWidth = weight + 5;
+            polyLineBorders.StrokeOpacity = 0.5;
+            polyLineBorders.StrokeColor = System.Drawing.Color.Black;
+            Parent.map.SetPathOptions((Path)polyLineBorders);
+
+            Path polyLineMask = (Path)layers[1];
+            polyLineMask.Fill = false;
+            polyLineMask.StrokeWidth = weight + 3;
+            polyLineMask.StrokeOpacity = 1.0;
+            polyLineMask.StrokeColor = System.Drawing.Color.White;
+            Parent.map.SetPathOptions((Path)polyLineMask);
+
+            Path polyLine = (Path)layers[2];
+            polyLine.Fill = false;
+            polyLine.StrokeWidth = weight + 3;
+            polyLine.StrokeOpacity = opacity;
+            polyLine.StrokeColor = System.Drawing.Color.FromArgb(colorInt);
+            Parent.map.SetPathOptions((Path)polyLine);
+
+            List<String> markerIdList = new List<String>();
+            for(int i =NUMBER_LAYERS_POLYLINE;i<nbLayers;i++) {
+                markerIdList.Add(layers[i].Id);
+            }
+            Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 1.0f);
+        }
+    }
+
+    private void HideSelectedLine(LineSelection selectedLine) {
+        if(lineLayersDict.ContainsKey(selectedLine.LineId)) {
+            Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+
+            Layer[] layers = lineLayersDict[selectedLine.LineId];
+            int nbLayers = layers.Length;
+
+            Polyline polyLineBorders = (Polyline)layers[0];
+            polyLineBorders.StrokeOpacity = 0.0;
+            polyLineBorders.StrokeColor = System.Drawing.Color.Empty;
+            polyLineBorders.Fill = false;
+            Parent.map.SetPathOptions((Path)polyLineBorders);
+
+            Polyline polyLineMask = (Polyline)layers[1];
+            polyLineMask.StrokeOpacity = 0.0;
+            polyLineBorders.StrokeColor = System.Drawing.Color.Empty;
+            polyLineBorders.Fill = false;
+            Parent.map.SetPathOptions((Path)polyLineMask);
+
+            Polyline polyLine = (Polyline)layers[2];
+            polyLine.StrokeOpacity = 0.0;
+            polyLineBorders.StrokeColor = System.Drawing.Color.Empty;
+            polyLineBorders.Fill = false;
+            Parent.map.SetPathOptions((Path)polyLine);
+
+            List<String> markerIdList = new List<String>();
+            for(int i =NUMBER_LAYERS_POLYLINE;i<nbLayers;i++) {
+                markerIdList.Add(layers[i].Id);
+            }
+            Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
+        }
+    }
+
+    private string LineCategoryFormattingString() {
+        if ((!isMobileView)&&(CollapsedSider)) {
+            return "margin-left: 2pt;";
+        }
+        else {
+            return "padding: 8pt;";
+        }
+    }
+
+
+    private string LineButtonFormattingString(string textcolor, string color, bool display, int width) {
+        string height;
+        string removedFormattingString = "";
+        string margin_string = "";
+        if ((!isMobileView)&&(CollapsedSider)) {
+            height = "30";
+        }
+        else {
+            height = "40";
+            margin_string = "margin-left: 5px; margin-top: 5px; margin-bottom: 5px;";
+        }
+
+        if (!display) {
+            removedFormattingString = "border-color: lightgrey; border-style: solid; border-width: 3px;";
+            color = color + "80";
+        }
+        return ($"color: #{textcolor}; background: #{color}; min-width: {width}px; height: {height}px; {removedFormattingString}" +
+                $"border-radius: 5px; {margin_string}; padding 0px 4px;");
+    }
+
+    private string LineIconFormattingString(string textcolor, string color, int iconWidth, int iconHeight) {
+        return ($"color: #{textcolor}; background: #{color}; min-width: {iconWidth}px; height: {iconHeight}px; border-radius: 4px; padding: 0px 0px; font-size: 80%; float: right; margin-right: 5px");
+    }
+
+    private string VariantButtonFormattingString(string fontColor, string color, float opacity) {
+        string rgba = GenerateRgba(color, opacity);
+        if(opacity < 0.25f) {
+            fontColor = "black";
+        }
+        else{
+            fontColor = "#" + fontColor;
+        }
+
+        return $"display: inline-block; font-size: 10pt; color: {fontColor}; background-color: {rgba}; width: {lineButtonWidth*18/10}px; height: 60px; white-space: normal;";
+    }
+
+    private string GetStateColor(int state) {
+        switch(state){
+            case 0: return "green";
+
+            case 1: return "orange";
+
+            case 3: return "red";
+
+            default: return "lightgrey";
+        }
+    }
+
+    private string StateCircleFormattingString(int state, int size) {
+        string color = GetStateColor(state);
+        return $"color: {color}; font-size: {size}pt; position:relative; bottom: {size}pt;";
+    }
+
+    private string GetLoadColor(int load) {
+        switch(load){
+            case 0: return "grey";
+
+            case 1: return "green";
+
+            case 2: return "orange";
+
+            case 3: return "red";
+
+            default: return "grey";
+        }
+    }
+
+    private string PeopleIconFormattingString(int load) {
+        string color = GetLoadColor(load);
+        return $"color: {color}; font-size: 12pt; position:absolute; transform: translateX({menuWidth - 75}px) translateY(-200%);";
+    }
+
+    public string GenerateRgba(string backgroundColor, float backgroundOpacity) {
+        string specifier = "G";
+        int rgb = int.Parse(backgroundColor, System.Globalization.NumberStyles.HexNumber);
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb  & 0xFF;
+        return string.Format("rgba({0}, {1}, {2}, {3});", r, g, b, backgroundOpacity.ToString(specifier, CultureInfo.InvariantCulture));
+    }
+
+    private string RemoveLineFromString(string input) {
+        return input.Remove(0, 6);
+    }
+
+    private BlazorLeaflet.Models.Icon GetVehicleIcon(string iconString, int load, int state) {
+        return new BlazorLeaflet.Models.Icon { 
+        Url = $"<div style=\"background-repeat: no-repeat; background-position: center; background: rgb(255,255,255, 1); border-radius: 50%; height: 22pt; width:22pt;\">" +
+              $"<i style=\"color:grey; font-size: 14pt; position:relative; left: 0.3rem;top: 0.3rem;\" class=\"{iconString}\"></i>" +
+              $"<i style=\"color:{GetStateColor(state)}; font-size: 0.3rem; position:relative; right: 1.3rem; bottom: 0.5rem;\" class=\"fas fa-circle\"></i></div>"};
+
+    }
+
+    public void ResetSiderTabsActiveKey (bool collapsed) {
+        if(collapsed) {
+            siderTabsActiveKey = "1";
+            StateHasChanged();
+        }
+    }
+
+    private void LineButtonClickHandler(LineSelection selectedLine) {
+        if (selectedLine.Display == true) {
+            HideSelectedLine(selectedLine);
+            selectedLine.Display = false;
+            selectedLine.Develop = false;
+        }
+        else{
+            DisplaySelectedLine(selectedLine, false);
+            selectedLine.Display = true;
+        }
+        StateHasChanged();
+    }
+
+    private void LineButtonMouseEnterEvent(LineSelection Buttonline) {
+        List<Path> pathList = new List<Path>();
+        Path path;
+        if(removeLines) {
+            List<String> markerIdList = new List<String>();
+            foreach (var selectedLine in SelectedLines) {
+                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                    Layer[] layers = lineLayersDict[selectedLine.LineId];
+                    for (int i = 0; i<NUMBER_LAYERS_POLYLINE; i++) {
+                        path = (Path)layers[i];
+                        path.StrokeOpacity = 0.0;
+                        pathList.Add(path);
+                    }
+                    for (int i = NUMBER_LAYERS_POLYLINE; i<layers.Length; i++) {
+                        markerIdList.Add(layers[i].Id);
+                    }
+                }
+            }
+            Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
+        }
+        else{
+            foreach (var selectedLine in SelectedLines) {
+                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                    Layer[] layers = lineLayersDict[selectedLine.LineId];
+                    path = (Path)layers[NUMBER_LAYERS_POLYLINE-1];
+                    path.StrokeOpacity = 0.5;
+                    path.StrokeColor = System.Drawing.Color.FromArgb(213, 217, 220);
+                    pathList.Add(path);
+                }
+            }
+        }
+
+        Parent.map.SetPathOptionsList(pathList.ToArray());
+
+        if(Buttonline.Display == false) {
+            DisplaySelectedLine(Buttonline, false);
+        }
+        for(int i =0;i<NUMBER_LAYERS_POLYLINE;i++){
+            Layer polylineLayer = lineLayersDict[Buttonline.LineId][i];
+            Parent.map.BringPathToFront((Path)polylineLayer);
+        }
+
+    }
+
+    private void LineButtonMouseLeaveEvent(LineSelection Buttonline) {
+        List<Path> pathList = new List<Path>();
+        Path path;
+
+        if(removeLines) {
+            List<String> markerIdList = new List<String>();
+            foreach (var selectedLine in SelectedLines) {
+                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                    Layer[] layers = lineLayersDict[selectedLine.LineId];
+                    for (int i = 0; i<NUMBER_LAYERS_POLYLINE; i++) {
+                        path = (Path)layers[i];
+                        path.StrokeOpacity = 1.0;
+                        pathList.Add(path);
+                    }
+                    for (int i = NUMBER_LAYERS_POLYLINE; i<layers.Length; i++) {
+                        markerIdList.Add(layers[i].Id);
+                    }
+                }
+            } 
+            Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 1.0f);
+        }
+        else{
+            foreach (var selectedLine in SelectedLines) {
+                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                    Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                    string color = line.Color;
+                    int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
+                    Layer[] layers = lineLayersDict[selectedLine.LineId];
+                    path = (Path)layers[NUMBER_LAYERS_POLYLINE-1];
+                    path.StrokeOpacity = 1.0;
+                    path.StrokeColor = System.Drawing.Color.FromArgb(colorInt);
+                    pathList.Add(path);
+                }
+            }
+        }
+
+        Parent.map.SetPathOptionsList(pathList.ToArray());
+
+        if(Buttonline.Display == false) {
+            HideSelectedLine(Buttonline);
+        }
+    }
+
+    private void ToggleLineRemoval() {
+        removeLines = !removeLines;
+    }
+
+    private void ChangeSelectedLineDirection(LineSelection selectedLine) {
+        RemoveSelectedLine(selectedLine);
+        if(selectedLine.Direction == 0) {
+            selectedLine.Direction = 1;
+        }
+        else {
+            selectedLine.Direction = 0;
+        }
+        DisplaySelectedLineFirstTime(selectedLine, false);
+        StateHasChanged();
+    }
+
+    private void ChangeSelectedVariation(LineSelection selectedLine, int variationNumber) {
+        RemoveSelectedLine(selectedLine);
+        selectedLine.VariationNumber = variationNumber;
+        DisplaySelectedLineFirstTime(selectedLine, false);
+        StateHasChanged();
+    }
+
+
+    private void RemoveSelectedLineFromDisplay(LineSelection selectedLine) {
+        HideSelectedLine(selectedLine);
+        selectedLine.Display = false;
+        selectedLine.Develop = false;
+        StateHasChanged();
+    }
+
+    private void ToggleSelectedLineDevelopment(LineSelection selectedLine) {
+        selectedLine.Develop = !selectedLine.Develop;
+        StateHasChanged();
+    }
+
+    private void ResetDevelopFields() {
+        foreach (LineSelection selectedLine in SelectedLines) {
+            selectedLine.Develop = false;
+        }
+    }
+
+    private void StationMouseOverEvent(LineSelection selectedLine, int stationIndex) {
+        int stationLayerIndex = stationIndex + NUMBER_LAYERS_POLYLINE;
+        Layer[] layers = lineLayersDict[selectedLine.LineId];
+        Layer stationLayer = layers[stationLayerIndex];
+        Parent.map.OpenPopup(stationLayer);
+    }
+
+    private void StationMouseOutEvent(LineSelection selectedLine, int stationIndex) {
+
+        int stationLayerIndex = stationIndex + NUMBER_LAYERS_POLYLINE;
+        Layer[] layers = lineLayersDict[selectedLine.LineId];
+        Layer stationLayer = layers[stationLayerIndex];
+        Parent.map.ClosePopup(stationLayer);
+    }
+
+    private void HideAllSelectedLines() {
+        foreach (LineSelection selectedLine in SelectedLines) {
+            HideSelectedLine(selectedLine);
+            selectedLine.Display = false;
+            selectedLine.Develop = false;
+        }
+        ResetSiderTabsActiveKey(true);
+    }
+
+    private void FilterVehicles() {
+        int layerIndex = 0;
+        int filteredPositionsIndex = 0;
+        List<String> markerIdListToHide = new List<String>();
+        List<String> markerIdListToShow = new List<String>();
+        if ((vehicleFilteringString != null) && (vehicleFilteringString != "")) {
+            Array.Clear(filteredPositions);
+
+            foreach (var position in apiPositions.Positions) {
+                bool vehicleFound = false;
+                Layer vehicleLayer = vehicleLayers[layerIndex];
+
+                if(position.Vehicle != null) {
+                    if(VehicleFilterMatch(position.Vehicle.ToLower())) {
+                        vehicleFound=true;
+                    }
+                }
+                else if (position.VehicleId != null) {
+                    if(VehicleFilterMatch(position.VehicleId.ToString())) {
+                        vehicleFound=true;
+                    }
+                }
+                else {
+                    foreach (var device in position.Devices) {
+                        if(VehicleFilterMatch(device.DeviceId)) {
+                            vehicleFound=true;
+                        }
+                    }
+                }
+
+                if(vehicleFound) {
+                    filteredPositions[filteredPositionsIndex++] = position;
+                    markerIdListToShow.Add(vehicleLayer.Id);
+                }
+                else {
+                    markerIdListToHide.Add(vehicleLayer.Id);
+                }
+                layerIndex++;
+            }
+            Array.Resize(ref filteredPositions, filteredPositionsIndex);
+            Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
+            Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
+            StateHasChanged();
+        }
+        else {
+            Array.Resize(ref filteredPositions, apiPositions.Positions.Length);
+            if (vehicleInitializationDone) {
+                foreach (var position in apiPositions.Positions) {
+                    filteredPositions[filteredPositionsIndex++] = position;
+                    Layer vehicleLayer = vehicleLayers[layerIndex++];
+                    markerIdListToShow.Add(vehicleLayer.Id);
+                }
+
+                Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
+                StateHasChanged();
+            }
+            else {
+                foreach (var position in apiPositions.Positions) {
+                    filteredPositions[filteredPositionsIndex++] = position;
+                }
+            }
+        }
+    }
+
+    private bool VehicleFilterMatch(string input) {
+        return input.Contains(vehicleFilteringString.ToLower());
+    }
+
+    private void VehicleMouseEnterEvent(int layerIndex) {
+        Layer vehicleLayer = vehicleLayers[layerIndex];
+        Parent.map.OpenPopup(vehicleLayer);
+    }
+
+    private void VehicleMouseLeaveEvent(int layerIndex) {
+        Layer vehicleLayer = vehicleLayers[layerIndex];
+        Parent.map.ClosePopup(vehicleLayer);
+    }
+
+    private void VehicleClickEvent(Flowly.Api.Positions.ApiPosition position) {
+        PointF center = new PointF((float)position.Latitude, (float)position.Longitude);
+        Parent.map.SetView(center, 14.0f, true);
+    }
+
+    private void ToggleVehiclesDisplay() {
+        if (hideVehicles){
+            UnHideAllVehicles();
+        }
+        else {
+            HideAllVehicles();
+        }
+    }
+
+    private void HideAllVehicles() {
+        List<String> markerIdList = new List<String>();
+        foreach (var layer in vehicleLayers) {
+            markerIdList.Add(layer.Id);
+        }
+        Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
+        hideVehicles = true;
+    }
+
+    private void UnHideAllVehicles() {
+        List<String> markerIdList = new List<String>();
+        foreach (var layer in vehicleLayers) {
+            markerIdList.Add(layer.Id);
+        }
+        Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 1.0f);
+        hideVehicles = false;
+    }
+
+    private void DisplayAllVehicles() {
+        int vehicleIndex = 0;
+        foreach (var position in apiPositions.Positions) {
+            string popupContent = CreateVehiclePopupContent(position);
+            Marker vehicleMarker = new Marker((float)position.Latitude, (float)position.Longitude) {
+                Icon = GetVehicleIcon(position.Icon, position.Load, position.State),
+                Popup = new Popup {
+                    Content = popupContent,
+                    ShowCloseButton = false
+                } //new Popup
+            }; // new Marker
+            Parent.map.AddLayer(vehicleMarker);
+            vehicleLayers[vehicleIndex++] = vehicleMarker;
+        } //foreach
+        hideVehicles = false;
+    }
+
+    private void RemoveAllVehicles() {
+        if(vehicleInitializationDone)
+        {
+            foreach (Layer vehicleLayer in vehicleLayers) {
+                Parent.map.RemoveLayer(vehicleLayer);
+            } 
+            hideVehicles = true;
+            Array.Clear(vehicleLayers);
+        }
+    }
+
+    private string CreateVehiclePopupContent (ApiPosition position) {
+        string popupContent = $"<div style= \"min-width:150pt; font-size: 9pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:6pt; justify-content:center;" +
+                              $"text-align: center; margin:10pt 0pt; word-spacing: 3pt;\"> {GetStateIcon(position.State)}" +
+                              $"<i style=\"color: black; font-size: 10pt;\" class=\"{position.Icon}\"></i>" +
+                              $"<span style= \"font-size: 9pt; padding: 0 10pt;\">{GetVehicleInfo(position.Vehicle, position.VehicleId)}</span>" +
+                              $"{GetPopupLoadIcon(GetLoadColor(position.Load))}</div>";
+
+        foreach (ApiDevice device in position.Devices) {
+            popupContent +=  $"<p style= \"font-size: 9pt; text-align: center; word-spacing: 3pt;\">" +
+                              $"{GetStateIcon(device.State)} {device.DeviceId}</p>";
+        }
+
+        return popupContent; 
+    }
+
+    private string GetVehicleInfo(string matriculation, int? stock_number) {
+        if((matriculation != null)&&(stock_number!= null)) {
+            return $"{matriculation} ({stock_number})";
+        }
+        else {
+            return GetLocalizedString("Non Renseigné");
+        }
+    }
+
+    private int GetHeaderHeight() {
+        return (windowHeight-100)*10/28;
+    }
+
+    private string GetStateIcon(int State) {
+        return $"<i style=\"color: {GetStateColor(State)}; font-size: 4pt; position:relative; left: -2pt; bottom: 4pt;\" class=\"fas fa-circle\"></i>";
+    }
+
+    private string GetPopupLoadIcon(string color) {
+        return $"<i style=\"color: {color}; font-size: 10pt;\" class=\"fas fa-users\"></i>";
+    }
+
+    private string GetPopupRealTimeIcon(bool realTime) {
+        string color;
+        if(realTime) {
+            color = "green";
+        }
+        else {
+            color = "grey";
+        }
+        return $"<i  style=\"color: {color}; font-size: 9pt;\" class=\"fas fa-broadcast-tower\"></i>";
+    }
+
+    private DateTime UnixTimeStampStringToDateTime(string timeStampString) {
+        double timeStamp;
+        Double.TryParse(timeStampString.Substring(6,13), out timeStamp);
+        DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        dateTime = dateTime.AddMilliseconds(timeStamp).ToLocalTime();
+        return dateTime;
+    }
+
+    private string FormatPassingTime(string timeStampString) {
+        DateTime passingTime = UnixTimeStampStringToDateTime(timeStampString);
+        return passingTime.ToString("t");
+    }
+
+    private string GetLocalizedString(string input)
+    {
+        return (string)Localize[input];
+    }
+}

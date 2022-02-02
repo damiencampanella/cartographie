@@ -1,0 +1,24 @@
+﻿@namespace BlazorFlowly.Components
+
+@inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
+
+<Popover ContentTemplate=Content Trigger="@(new AntDesign.Trigger[] { AntDesign.Trigger.Click})">
+    <Button Style="width: 60vw; background: #3EB1B8; border-radius: 2px;">
+        <Icon Type="info-circle" Style="color: white;" Theme="outline"/>
+        <span style="font-weight:bold; color: white;"> @GetLocalizedString("Aide en ligne")</span>
+    </Button>
+    <Icon Type="info-circle" Style="position: absolute; left:-5%; color:white;" Theme="outline"/>
+</Popover>
+
+
+@code {
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    private string GetLocalizedString(string input)
+    {
+        return (string)Localize[input];
+    }
+
+}
+

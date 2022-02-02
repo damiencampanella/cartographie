@@ -1,0 +1,25 @@
+﻿@namespace BlazorFlowly.Components
+
+<Card Style="background: #EDEDEE" BodyStyle="background: white">
+    <TitleTemplate>
+        <div style=@TitleStyle>
+            @Title  
+        </div>         
+    </TitleTemplate>
+    <Body>
+        @Content    
+    </Body>
+</Card>
+
+@code {
+
+    [Parameter]
+    public RenderFragment Title { get; set; }
+
+    [Parameter]
+    public RenderFragment Content { get; set; }
+
+    [Parameter]
+    public string TitleStyle { get; set; } = "";
+
+}

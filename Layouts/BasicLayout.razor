@@ -1,0 +1,41 @@
+﻿@namespace BlazorFlowly
+@inherits LayoutComponentBase
+
+@inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
+
+<AntDesign.ProLayout.BasicLayout 
+    Logo="@("https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg")"
+    MenuData="@MenuData">
+    <RightContentRender>
+        <BlazorFlowly.Components.RightContent />
+    </RightContentRender>
+    <ChildContent>
+        @Body
+    </ChildContent>
+    <FooterRender>
+        @*<FooterView Copyright="" Links="Links"></FooterView> *@
+    </FooterRender>
+</AntDesign.ProLayout.BasicLayout>
+<SettingDrawer />
+
+@code {
+    private MenuDataItem[] MenuData { get; set; } = { };
+
+    protected override void OnInitialized(){
+
+        base.OnInitialized();
+        MenuData = new MenuDataItem[1];
+
+        MenuData[0] = new MenuDataItem() { Path="/", Name=Localize["Cartographie"], Key="cartography", Icon="environment" };
+    }
+
+    public LinkItem[] Links { get; set; } = {
+        //new LinkItem
+        //{
+        //    Key = "Ant Design Blazor",
+        //    Title = "Ant Design Blazor",
+        //    Href = "https://antblazor.com",
+        //    BlankTarget = true,
+        //}
+    };
+}
