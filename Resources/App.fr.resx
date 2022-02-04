@@ -171,8 +171,8 @@
   <data name="Changer de direction" xml:space="preserve">
     <value>Changer de direction</value>
   </data>
-  <data name="charge estimée à cette horaire (voir ci-dessus pour la signification des couleurs de charge)" xml:space="preserve">
-    <value>charge estimée à cette horaire (voir ci-dessus pour la signification des couleurs de charge)</value>
+  <data name="charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)" xml:space="preserve">
+    <value>charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)</value>
   </data>
   <data name="charge importante" xml:space="preserve">
     <value>charge importante</value>
@@ -201,8 +201,8 @@
   <data name="Cliquez sur une ligne pour la désélectionner" xml:space="preserve">
     <value>Cliquez sur une ligne pour la désélectionner</value>
   </data>
-  <data name="Cliquez sur une station pour afficher les horaires des trois prochaines horaires de passage dans la direction sélectionnée" xml:space="preserve">
-    <value>Cliquez sur une station pour afficher les horaires des trois prochaines horaires de passage dans la direction sélectionnée</value>
+  <data name="Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée" xml:space="preserve">
+    <value>Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée</value>
   </data>
   <data name="Compte" xml:space="preserve">
     <value>Compte</value>
@@ -222,11 +222,11 @@
   <data name="JJ/MM/AAAA" xml:space="preserve">
     <value>JJ/MM/AAAA</value>
   </data>
-  <data name="l'horaire de passage donnée est théorique" xml:space="preserve">
-    <value>l'horaire de passage donnée est théorique</value>
+  <data name="l'horaire de passage donné est théorique" xml:space="preserve">
+    <value>l'horaire de passage donné est théorique</value>
   </data>
-  <data name="l'horaire de passage est calculée en temps réel" xml:space="preserve">
-    <value>l'horaire de passage est calculée en temps réel</value>
+  <data name="l'horaire de passage est calculé en temps réel" xml:space="preserve">
+    <value>l'horaire de passage est calculé en temps réel</value>
   </data>
   <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent:" xml:space="preserve">
     <value>L'onglet "Lignes" vous permet de sélectionner les lignes qui vous intéressent:</value>
@@ -240,8 +240,8 @@
   <data name="La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur" xml:space="preserve">
     <value>La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur</value>
   </data>
-  <data name="Les prochaines horaires de passage des correspondances sont aussi affichées" xml:space="preserve">
-    <value>Les prochaines horaires de passage des correspondances sont aussi affichées</value>
+  <data name="Les prochains horaires de passage des correspondances sont aussi affichés" xml:space="preserve">
+    <value>Les prochains horaires de passage des correspondances sont aussi affichés</value>
   </data>
   <data name="Lignes" xml:space="preserve">
     <value>Lignes</value>

@@ -31,4 +31,10 @@
             }
         }
     }
+
+    protected override void OnInitialized() {
+        var js = (IJSInProcessRuntime)jSRuntime;
+        string culture = js.Invoke<string>("appCulture.get");
+        CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture(culture);
+    }
 }

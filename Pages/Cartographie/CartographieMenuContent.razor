@@ -47,7 +47,7 @@
                             string previousCategory, categoryString;
                             if (apiMap.Lines[0].Category != "") {
                                 previousCategory = apiMap.Lines[0].Category;
-                                categoryString = @GetLocalizedString("Lignes") + " " + RemoveLineFromString(previousCategory); 
+                                categoryString = previousCategory; 
                             }
                             else {
                                 previousCategory = "";
@@ -79,8 +79,7 @@
                                             int categoryIndex = selectedLine.CategoryIndex;
                                             <AntDesign.Col Span="24">
                                                 @if (line.Category != "") {
-                                                    categoryString = @GetLocalizedString("Lignes") + " " + RemoveLineFromString(line.Category);
-                                                    <div><b style="@(LineCategoryFormattingString())">@categoryString</b></div>
+                                                    <div><b style="@(LineCategoryFormattingString())">@line.Category</b></div>
                                                 }
                                                 else{
                                                     <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
@@ -496,10 +495,10 @@
                 Parent.map.AddScale(scaleOptions);
 
                 #if DEBUG
-        stopWatch.Stop();
-        milliSec = stopWatch.ElapsedMilliseconds;
-        Console.WriteLine("  Total time taken to initialize the map: {0} milliseconds", milliSec);
-        stopWatch.Restart();
+    stopWatch.Stop();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time taken to initialize the map: {0} milliseconds", milliSec);
+    stopWatch.Restart();
                 #endif
 
                 // Display all lines
@@ -529,9 +528,9 @@
 
                 #if DEBUG
         stopWatch.Stop();
-        milliSec = stopWatch.ElapsedMilliseconds;
-        Console.WriteLine("  Total time to fetch the vehicle positions: {0} milliseconds", milliSec);
-        stopWatch.Restart();
+    milliSec = stopWatch.ElapsedMilliseconds;
+    Console.WriteLine("  Total time to fetch the vehicle positions: {0} milliseconds", milliSec);
+    stopWatch.Restart();
                 #endif
 
                 if((apiPositions != null) && (apiPositions.Positions != null))
@@ -1137,6 +1136,10 @@
             Parent.map.BringPathToFront((Path)polylineLayer);
         }
 
+        Flowly.Api.Map.ApiLine line = linesDict[Buttonline.LineId];
+        Flowly.Api.Map.ApiVariation variant = line.Roads[Buttonline.Direction].Variations[Buttonline.VariationNumber];
+        Single[] bounds = StringUtils.ExtractBoundsFromString(variant.Bounds);
+        Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
     }
 
     private void LineButtonMouseLeaveEvent(LineSelection Buttonline) {
@@ -1363,10 +1366,11 @@
         foreach (var position in apiPositions.Positions) {
             string popupContent = CreateVehiclePopupContent(position);
             Marker vehicleMarker = new Marker((float)position.Latitude, (float)position.Longitude) {
-                Icon = GetVehicleIcon(position.Icon, position.Load, position.State),
-                Popup = new Popup {
-                    Content = popupContent,
-                    ShowCloseButton = false
+                    Icon = GetVehicleIcon(position.Icon, position.Load, position.State),
+                    Popup = new Popup {
+                        Content = popupContent,
+                        Offset = new System.Drawing.Point(14, 10),
+                        ShowCloseButton = false
                 } //new Popup
             }; // new Marker
             Parent.map.AddLayer(vehicleMarker);

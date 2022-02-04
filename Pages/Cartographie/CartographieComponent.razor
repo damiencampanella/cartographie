@@ -14,7 +14,7 @@
     <div style="width:100%; height:5%">
         <HelperComponent @ref=helperComponent> 
             <Content>
-                <div style="width: 60vw;max-height: 85vh; overflow-y:scroll">
+                <div style="width: 65vw;max-height: 85vh; overflow-y:scroll">
                     <p class="helper_heading1">@GetLocalizedString("Partie carte"):</p>
                     <p class="helper_heading2">@GetLocalizedString("Cliquez sur un véhicule pour afficher les informations correspondantes"):</p>
                     <p style="padding-top: 10pt;" class="helper_line"><i style="padding-left: 1pt; color: grey; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
@@ -32,14 +32,14 @@
                         <p class="helper_line"><i style="padding-left: 1pt; color: grey; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
                             <span>@GetLocalizedString("[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)")</span></p>
                     <br/>
-                    <p class="helper_heading2">@GetLocalizedString("Cliquez sur une station pour afficher les horaires des trois prochaines horaires de passage dans la direction sélectionnée")</p>
-                    <p style="padding-top: 10pt;"  class="helper_line">@GetLocalizedString("Les prochaines horaires de passage des correspondances sont aussi affichées")</p>
+                    <p class="helper_heading2">@GetLocalizedString("Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée")</p>
+                    <p style="padding-top: 10pt;"  class="helper_line">@GetLocalizedString("Les prochains horaires de passage des correspondances sont aussi affichés")</p>
                     <p class="helper_line"><i style="color: grey; font-size: 10pt;" class="fas fa-users"></i>
-                        <span>: @GetLocalizedString("charge estimée à cette horaire (voir ci-dessus pour la signification des couleurs de charge)")</span></p>
+                        <span>: @GetLocalizedString("charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)")</span></p>
                     <p class="helper_line"><i style="color: grey; font-size: 10pt;" class="fas fa-broadcast-tower"></i>
-                        <span style="padding-right: 3pt">: @GetLocalizedString("l'horaire de passage donnée est théorique") - </span>
+                        <span style="padding-right: 3pt">: @GetLocalizedString("l'horaire de passage donné est théorique") - </span>
                         <i style="color: green; font-size: 10pt;" class="fas fa-broadcast-tower"></i>
-                        <span>: @GetLocalizedString("l'horaire de passage est calculée en temps réel")</span></p>
+                        <span>: @GetLocalizedString("l'horaire de passage est calculé en temps réel")</span></p>
                     <br/>
                     <p class="helper_heading1">@GetLocalizedString("Partie menu"):</p>
                     <p class="helper_heading2">@GetLocalizedString("L'onglet \"Lignes\" vous permet de sélectionner les lignes qui vous intéressent:")</p>
@@ -105,7 +105,7 @@
                 </div>
             </Content>   
         </HelperComponent>
-        <DateInputComponent Style="position: absolute; top: 0; right: 0; width:150pt;" SetInput="SetDateInput"></DateInputComponent>
+        <DateInputComponent Style="position: absolute; top: 0; right: 0; width:20vw;" SetInput="SetDateInput"></DateInputComponent>
     </div>
     <AntDesign.Layout Style="min-height: 95%; height: 95%;">
         @if (initializationDone) {
