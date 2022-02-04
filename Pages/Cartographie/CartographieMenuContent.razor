@@ -841,6 +841,16 @@
         StateHasChanged();
     }
 
+    private bool CheckAllCategoryLinesDisplayStatus(string category, bool status) {
+        foreach(var lineId in linesByCategoryDict[category]) {
+            LineSelection selectedLine = GetSelectedLine(lineId);
+            if(selectedLine.Display != status) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private LineSelection GetConnectingSelectedLine(string Id) {
         foreach (var lineSelection in SelectedLines) {
             if (lineSelection.LineId == Id) {
@@ -982,6 +992,7 @@
             }
             Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
         }
+        
     }
 
     private string LineCategoryFormattingString() {
@@ -1095,14 +1106,21 @@
     }
 
     private void LineButtonClickHandler(LineSelection selectedLine) {
+        Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
         if (selectedLine.Display == true) {
             HideSelectedLine(selectedLine);
             selectedLine.Display = false;
             selectedLine.Develop = false;
+            if(CheckAllCategoryLinesDisplayStatus(line.Category, false)) {
+                categoryHideDict[line.Category] = true;
+            }
         }
         else{
             DisplaySelectedLine(selectedLine, false);
             selectedLine.Display = true;
+            if(CheckAllCategoryLinesDisplayStatus(line.Category, true)) {
+                categoryHideDict[line.Category] = false;
+            }
         }
         StateHasChanged();
     }
@@ -1260,6 +1278,9 @@
             HideSelectedLine(selectedLine);
             selectedLine.Display = false;
             selectedLine.Develop = false;
+        }
+        foreach (var category in categoryHideDict.Keys) {
+            categoryHideDict[category] = true;
         }
         ResetSiderTabsActiveKey(true);
     }
