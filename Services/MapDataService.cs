@@ -8,7 +8,7 @@ namespace BlazorFlowly.Services
 {
     public interface IMapDataService
     {
-        Task<ApiMap> GetApiMapDataAsync();
+        Task<ApiMap> GetApiMapDataAsync(string url);
     }
 
     public class MapDataService : IMapDataService
@@ -20,10 +20,10 @@ namespace BlazorFlowly.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ApiMap> GetApiMapDataAsync()
+        public async Task<ApiMap> GetApiMapDataAsync(string url)
         {
             //return await _httpClient.GetFromJsonAsync<ApiMap>(Globals.TARGET_URL + "api/Map.ashx");
-            return await GetApiMapData(Globals.TARGET_URL + "api/Map.ashx");
+            return await GetApiMapData(url + "api/Map.ashx");
         }
 
         private async Task<ApiMap> GetApiMapData(string url)

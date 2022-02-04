@@ -8,7 +8,7 @@ namespace BlazorFlowly.Services
 {
     public interface IPositionsDataService
     {
-        Task<ApiPositions> GetApiPositionsDataAsync();
+        Task<ApiPositions> GetApiPositionsDataAsync(string url);
     }
 
     public class PositionsDataService : IPositionsDataService
@@ -20,10 +20,10 @@ namespace BlazorFlowly.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ApiPositions> GetApiPositionsDataAsync()
+        public async Task<ApiPositions> GetApiPositionsDataAsync(string url)
         {
             //return await _httpClient.GetFromJsonAsync<ApiPositions>(Globals.TARGET_URL + "api/Positions.ashx");
-            return await GetApiPositionsData(Globals.TARGET_URL + "api/Positions.ashx");
+            return await GetApiPositionsData(url + "api/Positions.ashx");
         }
         private async Task<ApiPositions> GetApiPositionsData(string url)
         {

@@ -8,7 +8,7 @@ namespace BlazorFlowly.Services
 {
     public interface IStopTimesDataService
     {
-        Task<ApiStopTimes> GetApiStopTimesDataAsync();
+        Task<ApiStopTimes> GetApiStopTimesDataAsync(string url);
     }
 
     public class StopTimesDataService : IStopTimesDataService
@@ -20,10 +20,10 @@ namespace BlazorFlowly.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ApiStopTimes> GetApiStopTimesDataAsync()
+        public async Task<ApiStopTimes> GetApiStopTimesDataAsync(string url)
         {
             //return await _httpClient.GetFromJsonAsync<ApiStopTimes>(Globals.TARGET_URL + "api/StopTimes.ashx");
-            return await GetApiStopTimesData(Globals.TARGET_URL + "api/StopTimes.ashx");
+            return await GetApiStopTimesData(url + "api/StopTimes.ashx");
 
         }
         private async Task<ApiStopTimes> GetApiStopTimesData(string url)

@@ -12,6 +12,8 @@
 @inject IPositionsDataService PositionsDataService
 @inject IStopTimesDataService StopTimesDataService
 @inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
+@inject Microsoft.Extensions.Configuration.IConfiguration config
+
 @if (DisplayMenu) {
     @if (mapInitializationDone) {
     string tabsStyle = "";
@@ -389,12 +391,12 @@
         Task<ApiPositions> positionsTask = null;
         try
         {
-            stopTimesTask = Task.Run<ApiStopTimes>(StopTimesDataService.GetApiStopTimesDataAsync);  
+            stopTimesTask = Task.Run<ApiStopTimes>(() => StopTimesDataService.GetApiStopTimesDataAsync(config["ApiUrl"]));  
 
-            mapTask = Task.Run<ApiMap>(MapDataService.GetApiMapDataAsync);  
+            mapTask = Task.Run<ApiMap>(() => MapDataService.GetApiMapDataAsync(config["ApiUrl"]));
 
             if(DisplayVehicles) {
-                positionsTask = Task.Run<ApiPositions>(PositionsDataService.GetApiPositionsDataAsync);
+                positionsTask = Task.Run<ApiPositions>(() => PositionsDataService.GetApiPositionsDataAsync(config["ApiUrl"]));
             }
 
             apiStopTimes = await stopTimesTask;
@@ -597,7 +599,7 @@
     private async Task ReloadRealTimeTask() {
         if(DisplayVehicles) {
             try {
-                apiPositions = await PositionsDataService.GetApiPositionsDataAsync();
+                apiPositions = await PositionsDataService.GetApiPositionsDataAsync(config["ApiUrl"]);
 
                 if ((apiPositions != null) && (apiPositions.Positions != null)) {
                     if (!hideVehicles)
@@ -623,7 +625,7 @@
 
         try
         {
-            apiStopTimes = await StopTimesDataService.GetApiStopTimesDataAsync();
+            apiStopTimes = await StopTimesDataService.GetApiStopTimesDataAsync(config["ApiUrl"]);
             if (apiStopTimes != null) {
                 //Update stopTimesDict
                 stopTimesDict.Clear();
