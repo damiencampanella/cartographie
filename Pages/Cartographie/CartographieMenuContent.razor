@@ -21,18 +21,18 @@
                 <span><AntDesign.Icon Type="branches" Theme="outline"/>@GetLocalizedString("Lignes")</span>
             </TabTemplate>
             <ChildContent>
-                @{
+                    @{
                     string lineDivString;
-                    if(isMobileView) {
+                    if (isMobileView) {
                         lineDivString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden;";
                     }
                     else {
                         lineDivString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
                     }
-                      
+
                     <div style=@lineDivString>
-                        @if(CollapsedSider) {
-                            foreach (LineSelection selectedLine in SelectedLines){
+                        @if (CollapsedSider) {
+                            foreach (LineSelection selectedLine in SelectedLines) {
                                 Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
                                 <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
                                     <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
@@ -44,22 +44,50 @@
                             }
                         }
                         else {
-                            string previousCategory, categoryString;
-                            if (apiMap.Lines[0].Category != "") {
-                                previousCategory = apiMap.Lines[0].Category;
-                                categoryString = previousCategory; 
-                            }
-                            else {
-                                previousCategory = "";
-                                categoryString = @GetLocalizedString("Lignes");
-                            }
+                            string emptyString = "";
                             <div style="padding: 0pt 10pt 0pt 10pt">
-                                <div class="ant-row" style="margin-left: -8px; margin-right: -8px; row-gap: 16px">
+                                <div class="ant-row" style="margin-top: 5pt; margin-left: -8px; margin-right: -8px; row-gap: 16px">
+                                    @foreach (string category in linesByCategoryDict.Keys){
+                                        if(category == emptyString) {
+                                            continue;
+                                        }
+                                        <AntDesign.Col Span="24">
+                                            <div><b style="@(LineCategoryFormattingString())">@category</b></div>
+
+                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(category)">
+                                                <ChildContent>
+                                                    @if (categoryHideDict[category]) {
+                                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
+                                                            <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                                        </TooltipComponent>
+                                                    }
+                                                    else {
+                                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
+                                                            <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                                        </TooltipComponent>
+                                                    }
+                                                </ChildContent>
+                                            </Button>
+                                        </AntDesign.Col>
+                                        @foreach(var lineId in linesByCategoryDict[category]) {
+                                            LineSelection selectedLine = GetSelectedLine(lineId);
+                                            Flowly.Api.Map.ApiLine line = linesDict[lineId];
+                                            <AntDesign.Col Span="8">
+                                                <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
+                                                    <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
+                                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
+                                                                OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                                        </Button>
+                                                    </div>
+                                                </TooltipComponent>
+                                            </AntDesign.Col>
+                                        }
+                                    }
                                     <AntDesign.Col Span="24">
-                                        <div><b style="padding: 8pt;position: relative; top: 5pt">@categoryString</b></div>
-                                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: 20%;" Size="Small" OnClick="() => ToggleCategoryHide(0)">
+                                        <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
+                                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(emptyString)">
                                             <ChildContent>
-                                                @if (categoryHide[0]) {
+                                                @if (categoryHideDict[emptyString]) {
                                                     <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
                                                         <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
                                                     </TooltipComponent>
@@ -72,35 +100,9 @@
                                             </ChildContent>
                                         </Button>
                                     </AntDesign.Col>
-
-                                    @foreach (LineSelection selectedLine in SelectedLines){
-                                        Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
-                                        @if(line.Category != previousCategory){
-                                            int categoryIndex = selectedLine.CategoryIndex;
-                                            <AntDesign.Col Span="24">
-                                                @if (line.Category != "") {
-                                                    <div><b style="@(LineCategoryFormattingString())">@line.Category</b></div>
-                                                }
-                                                else{
-                                                    <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
-                                                }
-                                                <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(categoryIndex)">
-                                                    <ChildContent>
-                                                        @if (categoryHide[categoryIndex]) {
-                                                            <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
-                                                                <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
-                                                            </TooltipComponent>
-                                                        }
-                                                        else {
-                                                            <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
-                                                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                                            </TooltipComponent>
-                                                        }
-                                                    </ChildContent>
-                                                </Button>
-                                            </AntDesign.Col>
-                                            previousCategory = line.Category;
-                                        }
+                                    @foreach(var lineId in linesByCategoryDict[emptyString]) {
+                                        LineSelection selectedLine = GetSelectedLine(lineId);
+                                        Flowly.Api.Map.ApiLine line = linesDict[lineId];
                                         <AntDesign.Col Span="8">
                                             <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
                                                 <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
@@ -110,7 +112,6 @@
                                                 </div>
                                             </TooltipComponent>
                                         </AntDesign.Col>
-
                                     }
                                 </div>
                             </div>
@@ -350,6 +351,8 @@
     private Dictionary<string,Flowly.Api.Map.ApiStation> stationsDict;
     private Dictionary<string, HashSet<string>> stationsConnectionDict;
     private Dictionary<string,Flowly.Api.Map.ApiLine> linesDict;
+    private Dictionary<string, List<string>> linesByCategoryDict;
+    private Dictionary<string, bool> categoryHideDict;
     private Layer[] vehicleLayers;
     private BlazorLeaflet.Models.Icon stationIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Station.png", Width = 10, Height = 10};
     private BlazorLeaflet.Models.Icon terminusIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Terminus.png", Width = 10, Height = 10};
@@ -361,7 +364,6 @@
     private string siderTabsActiveKey = "1";
     private string vehicleFilteringString = "";
     private ApiPosition[] filteredPositions;
-    private bool[] categoryHide;
 
     #if DEBUG
     private Stopwatch stopWatch;
@@ -466,6 +468,7 @@
                 }
 
 
+
                 // Initialize bounds
                 if(DisplayOneLine) {
                     Flowly.Api.Map.ApiLine line = linesDict[LineToDisplay];
@@ -507,9 +510,7 @@
                     DisplaySelectedLineFirstTime(selectedLine, false);
                 }
 
-                int numberCategories = InitializeCategories();
-                categoryHide = new bool[numberCategories];
-                Array.Fill(categoryHide, false);
+                InitializeCategories();
 
                 mapInitializationDone = true;
             }
@@ -564,20 +565,30 @@
         reloadRealTimeTimer.Enabled = true;  
     }
 
-    private int InitializeCategories() {
-        int numberCategories = 0;
-        string previousCategory = apiMap.Lines[0].Category;
+    private void InitializeCategories() {
+        linesByCategoryDict = new();
+        categoryHideDict = new();
         foreach (LineSelection selectedLine in SelectedLines){
             Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
-            if(line.Category != previousCategory) {
-                numberCategories++;
-                previousCategory = line.Category;
+            //string Category = String.IsNullOrEmpty(line.Category) ? GetLocalizedString("Autres Lignes") : line.Category;
+            if (linesByCategoryDict.ContainsKey(line.Category)) {
+                linesByCategoryDict[line.Category].Add(line.Id);
             }
-            selectedLine.CategoryIndex = numberCategories;
+            else {
+                linesByCategoryDict.Add(line.Category, new List<string>() { line.Id });
+                categoryHideDict.Add(line.Category,false);
+            }
         }
-        return numberCategories+1;
     }
 
+    private LineSelection GetSelectedLine(string LineId) {
+        foreach (LineSelection selectedLine in SelectedLines) {
+            if(selectedLine.LineId == LineId) {
+                return selectedLine;
+            }
+        }
+        return SelectedLines[0];
+    }
 
     private void ReloadRealTimeEvent(object source, ElapsedEventArgs e) {
         Task.Run(async () => await ReloadRealTimeTask());
@@ -801,12 +812,13 @@
         return stationPopupString;
     }
 
-    private void ToggleCategoryHide(int categoryIndex) {
-        if(categoryHide[categoryIndex]) {
-            categoryHide[categoryIndex] = false;
+    private void ToggleCategoryHide(string category) {
+        if(categoryHideDict[category]) {
+            categoryHideDict[category] = false;
             foreach( var selectedLine in SelectedLines)
             {
-                if (selectedLine.CategoryIndex == categoryIndex)
+                Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                if (line.Category == category)
                 {
                     DisplaySelectedLine(selectedLine, false);
                     selectedLine.Display = true;
@@ -814,10 +826,11 @@
             }
         }
         else {
-            categoryHide[categoryIndex] = true;
+            categoryHideDict[category] = true;
             foreach( var selectedLine in SelectedLines)
             {
-                if (selectedLine.CategoryIndex == categoryIndex)
+                Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
+                if (line.Category == category)
                 {
                     HideSelectedLine(selectedLine);
                     selectedLine.Display = false;

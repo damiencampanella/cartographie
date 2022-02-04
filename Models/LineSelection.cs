@@ -7,7 +7,5 @@
         public bool Display { get; set; } = true;
 
         public bool Develop { get; set; } = false;
-
-        public int CategoryIndex { get; set; } = 0;
     }
 }
