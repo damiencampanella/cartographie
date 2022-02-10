@@ -509,7 +509,7 @@
                 // Display all lines
                 foreach (var selectedLine in SelectedLines)
                 {
-                    DisplaySelectedLineFirstTime(selectedLine, false);
+                    DisplaySelectedLineFirstTime(selectedLine);
                 }
 
                 InitializeCategories();
@@ -664,16 +664,12 @@
         StateHasChanged();
     }
 
-    private void DisplaySelectedLineFirstTime(LineSelection selectedLine, bool greyPolyline) {
+    private void DisplaySelectedLineFirstTime(LineSelection selectedLine) {
         if (!lineLayersDict.ContainsKey(selectedLine.LineId)) {
             Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
             Flowly.Api.Map.ApiVariation selectedVariation = line.Roads[selectedLine.Direction].Variations[selectedLine.VariationNumber];
             string color = line.Color;
             double opacity = 1.0;
-            if (greyPolyline) {
-                color = "D5D9DC";
-                opacity = 0.5;
-            }
 
             int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
             int weight = line.Weight;
@@ -834,7 +830,11 @@
                 Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
                 if (line.Category == category)
                 {
-                    HideSelectedLine(selectedLine);
+                    if(removeLines) {
+                        HideSelectedLine(selectedLine);
+                    } else {
+                        DisplaySelectedLine(selectedLine, true);
+                    }
                     selectedLine.Display = false;
                     selectedLine.Develop = false;
                 }
@@ -994,7 +994,7 @@
             }
             Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
         }
-        
+
     }
 
     private string LineCategoryFormattingString() {
@@ -1110,7 +1110,11 @@
     private void LineButtonClickHandler(LineSelection selectedLine) {
         Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
         if (selectedLine.Display == true) {
-            HideSelectedLine(selectedLine);
+            if(removeLines) {
+                HideSelectedLine(selectedLine);
+            } else {
+                DisplaySelectedLine(selectedLine, true);
+            }
             selectedLine.Display = false;
             selectedLine.Develop = false;
             if(CheckAllCategoryLinesDisplayStatus(line.Category, false)) {
@@ -1175,14 +1179,14 @@
         Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
     }
 
-    private void LineButtonMouseLeaveEvent(LineSelection Buttonline) {
+    private void LineButtonMouseLeaveEvent(LineSelection buttonLine) {
         List<Path> pathList = new List<Path>();
         Path path;
 
         if(removeLines) {
             List<String> markerIdList = new List<String>();
             foreach (var selectedLine in SelectedLines) {
-                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                if((selectedLine.Display == true)&&(selectedLine != buttonLine)) {
                     Layer[] layers = lineLayersDict[selectedLine.LineId];
                     for (int i = 0; i<NUMBER_LAYERS_POLYLINE; i++) {
                         path = (Path)layers[i];
@@ -1198,7 +1202,7 @@
         }
         else{
             foreach (var selectedLine in SelectedLines) {
-                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                if((selectedLine.Display == true)&&(selectedLine != buttonLine)) {
                     Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
                     string color = line.Color;
                     int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
@@ -1213,13 +1217,35 @@
 
         Parent.map.SetPathOptionsList(pathList.ToArray());
 
-        if(Buttonline.Display == false) {
-            HideSelectedLine(Buttonline);
+        if(buttonLine.Display == false) {
+            if(removeLines) {
+                HideSelectedLine(buttonLine);
+            } else {
+                DisplaySelectedLine(buttonLine, true);
+            }
         }
     }
 
     private void ToggleLineRemoval() {
         removeLines = !removeLines;
+        if(removeLines) {
+            foreach( var selectedLine in SelectedLines)
+            {
+                if (selectedLine.Display == false)
+                {
+                    HideSelectedLine(selectedLine);
+                }
+            }
+        } else {
+            foreach( var selectedLine in SelectedLines)
+            {
+                if (selectedLine.Display == false)
+                {
+                    DisplaySelectedLine(selectedLine, true);
+                }
+            }
+            
+        }
     }
 
     private void ChangeSelectedLineDirection(LineSelection selectedLine) {
@@ -1230,20 +1256,24 @@
         else {
             selectedLine.Direction = 0;
         }
-        DisplaySelectedLineFirstTime(selectedLine, false);
+        DisplaySelectedLineFirstTime(selectedLine);
         StateHasChanged();
     }
 
     private void ChangeSelectedVariation(LineSelection selectedLine, int variationNumber) {
         RemoveSelectedLine(selectedLine);
         selectedLine.VariationNumber = variationNumber;
-        DisplaySelectedLineFirstTime(selectedLine, false);
+        DisplaySelectedLineFirstTime(selectedLine);
         StateHasChanged();
     }
 
 
     private void RemoveSelectedLineFromDisplay(LineSelection selectedLine) {
-        HideSelectedLine(selectedLine);
+        if(removeLines) {
+            HideSelectedLine(selectedLine);
+        } else {
+            DisplaySelectedLine(selectedLine, true);
+        }
         selectedLine.Display = false;
         selectedLine.Develop = false;
         StateHasChanged();
@@ -1277,7 +1307,11 @@
 
     private void HideAllSelectedLines() {
         foreach (LineSelection selectedLine in SelectedLines) {
-            HideSelectedLine(selectedLine);
+            if(removeLines) {
+                HideSelectedLine(selectedLine);
+            } else {
+                DisplaySelectedLine(selectedLine, true);
+            }
             selectedLine.Display = false;
             selectedLine.Develop = false;
         }
