@@ -15,6 +15,7 @@ p.helper_heading2 {
 p.helper_line {
     padding-left: 40pt;
 }
+
 button.carto_bottom_button {
     display: block;
     position: absolute;
@@ -45,6 +46,16 @@ li.station-list-item {
     top: 0;
     bottom: 0;
     margin: 0 0 0 0;
+}
+
+li.station-list-item:enabled {
+    animation: disable-pointer-events 1000ms;
+}
+
+@keyframes disable-pointer-events {
+    0%, 99% {
+        pointer-events: none;
+    }
 }
 
 li.station-list-item:hover {

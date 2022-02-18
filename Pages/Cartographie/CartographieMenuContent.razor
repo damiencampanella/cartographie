@@ -208,8 +208,8 @@
                                                 @if(stationRef == selectedVariation.Stations[selectedVariation.Stations.Length - 1]) {
                                                     spanStyle += "border-radius: 0px 0px 3px 3px";
                                                 }
-                                                <li class="station-list-item" @onmouseover="() => StationMouseOverEvent(selectedLine, stationIndex)" 
-                                                            @onmouseout="() => StationMouseOutEvent(selectedLine, stationIndex)">
+                                                <li class="station-list-item" @onmouseenter="() => StationMouseEnterEvent(selectedLine, stationIndex)" 
+                                                    @onclick="() => StationClickEvent()" @onmouseleave="() => StationMouseLeaveEvent(selectedLine, stationIndex)">
 
                                                     <span style=@spanStyle><i style="color: white; font-size:7pt; margin: 3pt 3pt;" class="fas fa-circle"></i></span>
                                                     <span style="position: relative; left: 20pt" >@station.Name</span>
@@ -366,6 +366,7 @@
     private string siderTabsActiveKey = "1";
     private string vehicleFilteringString = "";
     private ApiPosition[] filteredPositions;
+    private bool closeStationPopup = true;
 
     #if DEBUG
     private Stopwatch stopWatch;
@@ -685,9 +686,9 @@
             var polyLineBorders = new Polyline {
                 Shape = shape,
                 Fill = false,
-                StrokeWidth = weight + 5,
-                StrokeOpacity = 0.5,
-                StrokeColor = System.Drawing.Color.Black,
+                StrokeWidth = weight + 9,
+                StrokeOpacity = 1.0,
+                StrokeColor = System.Drawing.Color.White,
                 NoClipEnabled = false
             };
             Parent.map.AddLayer(polyLineBorders);
@@ -696,7 +697,7 @@
             var polyLineMask = new Polyline {
                 Shape = shape,
                 Fill = false,
-                StrokeWidth = weight + 3,
+                StrokeWidth = weight + 5,
                 StrokeColor = System.Drawing.Color.White,
                 NoClipEnabled = false
             };
@@ -706,7 +707,7 @@
             var polyLine = new Polyline {
                 Shape = shape,
                 Fill = false,
-                StrokeWidth = weight + 3,
+                StrokeWidth = weight + 5,
                 StrokeColor = System.Drawing.Color.FromArgb(colorInt),
                 StrokeOpacity = opacity,
                 NoClipEnabled = false,
@@ -936,21 +937,21 @@
 
             Path polyLineBorders = (Path)layers[0];
             polyLineBorders.Fill = false;
-            polyLineBorders.StrokeWidth = weight + 5;
-            polyLineBorders.StrokeOpacity = 0.5;
-            polyLineBorders.StrokeColor = System.Drawing.Color.Black;
+            polyLineBorders.StrokeWidth = weight + 9;
+            polyLineBorders.StrokeOpacity = 1.0;
+            polyLineBorders.StrokeColor = System.Drawing.Color.White;
             Parent.map.SetPathOptions((Path)polyLineBorders);
 
             Path polyLineMask = (Path)layers[1];
             polyLineMask.Fill = false;
-            polyLineMask.StrokeWidth = weight + 3;
+            polyLineMask.StrokeWidth = weight + 5;
             polyLineMask.StrokeOpacity = 1.0;
             polyLineMask.StrokeColor = System.Drawing.Color.White;
             Parent.map.SetPathOptions((Path)polyLineMask);
 
             Path polyLine = (Path)layers[2];
             polyLine.Fill = false;
-            polyLine.StrokeWidth = weight + 3;
+            polyLine.StrokeWidth = weight + 5;
             polyLine.StrokeOpacity = opacity;
             polyLine.StrokeColor = System.Drawing.Color.FromArgb(colorInt);
             Parent.map.SetPathOptions((Path)polyLine);
@@ -1173,10 +1174,11 @@
             Parent.map.BringPathToFront((Path)polylineLayer);
         }
 
-        Flowly.Api.Map.ApiLine line = linesDict[Buttonline.LineId];
-        Flowly.Api.Map.ApiVariation variant = line.Roads[Buttonline.Direction].Variations[Buttonline.VariationNumber];
-        Single[] bounds = StringUtils.ExtractBoundsFromString(variant.Bounds);
-        Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
+        // Fit Map to the line bounds ?
+        //Flowly.Api.Map.ApiLine line = linesDict[Buttonline.LineId];
+        //Flowly.Api.Map.ApiVariation variant = line.Roads[Buttonline.Direction].Variations[Buttonline.VariationNumber];
+        //Single[] bounds = StringUtils.ExtractBoundsFromString(variant.Bounds);
+        //Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
     }
 
     private void LineButtonMouseLeaveEvent(LineSelection buttonLine) {
@@ -1244,7 +1246,7 @@
                     DisplaySelectedLine(selectedLine, true);
                 }
             }
-            
+
         }
     }
 
@@ -1290,19 +1292,25 @@
         }
     }
 
-    private void StationMouseOverEvent(LineSelection selectedLine, int stationIndex) {
+    private void StationMouseEnterEvent(LineSelection selectedLine, int stationIndex) {
         int stationLayerIndex = stationIndex + NUMBER_LAYERS_POLYLINE;
         Layer[] layers = lineLayersDict[selectedLine.LineId];
         Layer stationLayer = layers[stationLayerIndex];
         Parent.map.OpenPopup(stationLayer);
+        closeStationPopup = true;
     }
 
-    private void StationMouseOutEvent(LineSelection selectedLine, int stationIndex) {
+    private void StationClickEvent() {
+        closeStationPopup = false;
+    }
 
-        int stationLayerIndex = stationIndex + NUMBER_LAYERS_POLYLINE;
-        Layer[] layers = lineLayersDict[selectedLine.LineId];
-        Layer stationLayer = layers[stationLayerIndex];
-        Parent.map.ClosePopup(stationLayer);
+    private void StationMouseLeaveEvent(LineSelection selectedLine, int stationIndex) {
+        if(closeStationPopup) {
+            int stationLayerIndex = stationIndex + NUMBER_LAYERS_POLYLINE;
+            Layer[] layers = lineLayersDict[selectedLine.LineId];
+            Layer stationLayer = layers[stationLayerIndex];
+            Parent.map.ClosePopup(stationLayer);
+        }
     }
 
     private void HideAllSelectedLines() {
@@ -1493,7 +1501,7 @@
     }
 
     private string GetPopupLoadIcon(string color) {
-        return $"<i style=\"color: {color}; font-size: 10pt;\" class=\"fas fa-users\"></i>";
+        return $"<i style=\"color: {color}; font-size: 10pt; padding-right:3px;\" class=\"fas fa-users\"></i>";
     }
 
     private string GetPopupRealTimeIcon(bool realTime) {
@@ -1504,7 +1512,7 @@
         else {
             color = "grey";
         }
-        return $"<i  style=\"color: {color}; font-size: 9pt;\" class=\"fas fa-broadcast-tower\"></i>";
+        return $"<i  style=\"color: {color}; font-size: 9pt;\" class=\"fas fa-wifi\"></i>";
     }
 
     private DateTime UnixTimeStampStringToDateTime(string timeStampString) {
