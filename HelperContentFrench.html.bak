@@ -1,0 +1,71 @@
+<div class="helper_main_div_style">
+    <p class="helper_heading1">Partie carte:</p>
+	<p class="helper_heading2">Cliquez sur un véhicule pour afficher les informations correspondantes:</p>
+	<p class="helper_line_with_paddingtop">
+	    <i class="fas fa-circle helper_circle grey_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding">: statut du véhicule inconnu - </span>
+		<i class="fas fa-circle helper_circle green_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding"> : statut OK - </span>
+		<i class="fas fa-circle helper_circle orange_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding"> : pas de signal reçu depuis 5min - </span>
+		<i class="fas fa-circle helper_circle red_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i>: pas de signal reçu depuis plus de 10min
+	</p>
+	<p class="helper_line">
+	    <i class="fas fa-users helper_icon grey_icon" aria-hidden="true"></i>: pas de prédiction de charge - 
+		<i class="fas fa-users helper_icon green_icon" aria-hidden="true"></i><span class="helper_padding">: charge légère - </span>
+		<i class="fas fa-users helper_icon orange_icon" aria-hidden="true"></i><span class="helper_padding">: charge modérée - </span>
+		<i class="fas fa-users helper_icon red_icon" aria-hidden="true"></i>: charge importante
+	</p>
+	<p class="helper_line">Le premier bouton indique la ligne du véhicule</p>
+	<p class="helper_line"><span class="direction_button_helper">Aller</span> <span>Le second indique sa direction</span></p>
+	<p class="helper_line"><span class="delay_button_helper">En retard</span> <span>Le troisième indique son retard</span></p>
+	<p class="helper_line">La ligne en gras affiche la prochaine station du véhicule</p>
+	<p class="helper_line"><i class="fas fa-circle helper_circle grey_icon" aria-hidden="true"></i><span>[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)</span></p>
+	<br>
+	<p class="helper_heading2">Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée</p>
+	<p class="helper_line_with_paddingtop">Les prochains horaires de passage des correspondances sont aussi affichés</p>
+	<p class="helper_line"><i class="fas fa-users helper_icon grey_icon" aria-hidden="true"></i><span>: charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)</span></p>
+	<p class="helper_line">
+	    <i class="fas fa-broadcast-tower helper_icon grey_icon" aria-hidden="true"></i><span class="helper_padding">:l'horaire de passage donné est théorique - </span>
+		<i class="fas fa-broadcast-tower helper_icon green_icon" aria-hidden="true"></i><span>:l'horaire de passage est calculé en temps réel</span>
+	</p>
+	<br>
+	<p class="helper_heading1">Partie menu:</p>
+	<p class="helper_heading2">L'onglet "Lignes" vous permet de sélectionner les lignes qui vous intéressent:</p>
+	<p class="helper_line_with_paddingtop">Amenez la souris au-dessus d'une ligne pour masquer les autres lignes</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border rounded_border">
+		    <i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i>
+			<span class="carto_button_text">Lignes Masquées</span>
+		</span>    Ce bouton permet de griser les autres lignes au lieu de les masquer
+	</p>
+	<p class="helper_line">Cliquez sur une ligne pour la désélectionner</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i>
+		</span>    Ce bouton permet de désélectionner toutes les lignes de la catégorie correspondante
+	</p>
+	<br>
+	<p class="helper_heading2">L'onglet "Sélection" vous permet choisir la direction et la variante sélectionnée pour chaque ligne</p>
+	<p class="helper_line_with_paddingtop">Cliquez sur une des lignes pour obtenir la liste des variantes et la liste des stations de la variante sélectionnée</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-arrow-right" aria-hidden="true"></i></span>     Ce bouton permet de changer de direction
+	</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-times carto_button_icon" aria-hidden="true"></i>
+		</span>     Ce bouton permet de désélectionner la ligne
+	</p>
+	<p class="helper_line">Cliquez sur la variante voulue pour la sélectionner</p>
+	<p class="helper_line">Amenez la souris au-dessus d'une des stations de la liste pour afficher les informations correspondantes</p>
+	<p class="helper_line">A droite de chaque station sont affichées les correspondances possibles</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border"><i class="fas fa-times carto_button_icon" aria-hidden="true"></i><span class="carto_button_text">Supprimer toutes les lignes sélectionnées</span>
+		</span>     Ce bouton permet de désélectionner toutes les lignes
+	</p>
+	<br>
+	<p class="helper_heading2">L'onglet "Véhicules" vous permet d'afficher la liste des véhicules ayant un capteur</p>
+	<p class="helper_line_with_paddingtop">Utilisez le champ correspondant pour rechercher parmi les véhicules.</p>
+	<p class="helper_line">La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur</p>
+	<p class="helper_line">Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes</p>
+	<p class="helper_line">Cliquez sur un véhicule pour zoomer dessus</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border"><i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i><span class="carto_button_text">Masquer les véhicules</span>
+		</span>     Ce bouton permet de masquer tous les véhicules
+	</p>
+</div>

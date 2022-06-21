@@ -13,34 +13,49 @@
 @inject IStopTimesDataService StopTimesDataService
 @inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
 @inject Microsoft.Extensions.Configuration.IConfiguration config
+@inject NavigationManager navigationManager
 
 @if (DisplayMenu) {
     @if (mapInitializationDone) {
-    string tabsStyle = "";
-    <Tabs Style=@tabsStyle @bind-ActiveKey="@siderTabsActiveKey">
-        <TabPane Key="1">
-            <TabTemplate>
-                <span><AntDesign.Icon Type="branches" Theme="outline"/>@GetLocalizedString("Lignes")</span>
-            </TabTemplate>
-            <ChildContent>
-                    @{
+        <ul class="nav nav-tabs" id="tabs_carto">
+            <li class="nav-item">
+                <a style="margin-left:4pt;" class="nav-link active" data-toggle="tab" href="#lines">
+                    <span class="carto_tab"><i class="fas fa-code-branch tab_icon"></i> @GetLocalizedString("Lignes")</span>
+                </a>
+            </li>
+            @if (!CollapsedSider) {
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#selection">
+                        <span class="carto_tab"><i class="fas fa-list-ul tab_icon"></i> @GetLocalizedString("Sélection")</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#vehicles">
+                        <span class="carto_tab"><i class="fas fa-map-marker-alt tab_icon"></i> @GetLocalizedString("Véhicules")</span>
+                    </a>
+                </li>
+            }
+        </ul>
+        <div class="tab-content">
+            <div id="lines" class="tab-pane active" style="padding-top: 10pt;">
+                @{
                     string lineDivString;
                     if (isMobileView) {
                         lineDivString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden;";
                     }
                     else {
-                        lineDivString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                        lineDivString = $"max-height:calc(100vh - 170px); ; overflow-y:auto; padding-top: 10pt;";
                     }
 
-                    <div style=@lineDivString>
+                    <div id="lines_subdiv" style=@lineDivString>
                         @if (CollapsedSider) {
                             foreach (LineSelection selectedLine in SelectedLines) {
                                 Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
-                                <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
+                                <TooltipComponent Title="@line.Name">
                                     <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
-                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
-                                                OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
-                                        </Button>
+                                        <button class="btn" style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth*5/4))"
+                                                @onclick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                        </button>
                                     </div>
                                 </TooltipComponent>
                             }
@@ -48,154 +63,154 @@
                         else {
                             string emptyString = "";
                             <div style="padding: 0pt 10pt 0pt 10pt">
-                                <div class="ant-row" style="margin-top: 5pt; margin-left: -8px; margin-right: -8px; row-gap: 16px">
-                                    @foreach (string category in linesByCategoryDict.Keys){
-                                        if(category == emptyString) {
-                                            continue;
+                                <div class="container-fluid" style="padding:0;">
+                                    <div class="row" style="margin-top: 5pt; margin-left: -8px; margin-right: -8px; row-gap: 16px">
+                                        @foreach (string category in linesByCategoryDict.Keys){
+                                            if(category == emptyString) {
+                                                continue;
+                                            }
+                                            <div class="col-12 d-flex flex-row align-items-center justify-content-between" style="padding:0">
+                                                <div><b style="@(LineCategoryFormattingString())">@category</b></div>
+                                                <button type="button" class="btn btn-outline-primary  btn-sm" style="border-radius: 5px; margin-right: 9pt;" @onclick="() => ToggleCategoryHide(category)">
+                                                        @if (categoryHideDict[category]) {
+                                                            <TooltipComponent Title="@GetLocalizedString("Afficher cette catégorie")" Placement="top">
+                                                                <span><i class="fas fa-eye carto_button_icon small"></i></span>
+                                                            </TooltipComponent>
+                                                        }
+                                                        else {
+                                                            <TooltipComponent Title="@GetLocalizedString("Masquer cette catégorie")" Placement="top">
+                                                                <span><i class="fas fa-eye-slash carto_button_icon small"></i></span>
+                                                            </TooltipComponent>
+                                                        }
+                                                </button>
+                                            </div>
+                                            @foreach(var lineId in linesByCategoryDict[category]) {
+                                                LineSelection selectedLine = GetSelectedLine(lineId);
+                                                Flowly.Api.Map.ApiLine line = linesDict[lineId];
+                                                <div class="col-3" style="padding:0">
+                                                    <TooltipComponent Title="@line.Name">
+                                                        <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
+                                                            <button class="btn" style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
+                                                                    @onclick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                                            </button>
+                                                        </div>
+                                                    </TooltipComponent>
+                                                </div>
+                                            }
                                         }
-                                        <AntDesign.Col Span="24">
-                                            <div><b style="@(LineCategoryFormattingString())">@category</b></div>
-
-                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(category)">
-                                                <ChildContent>
-                                                    @if (categoryHideDict[category]) {
-                                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
-                                                            <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
+                                        <div class="col-12 d-flex flex-row align-items-center justify-content-between" style="padding:0">
+                                            <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius: 5px; margin-right: 9pt;" @onclick="() => ToggleCategoryHide(emptyString)">
+                                                    @if (categoryHideDict[emptyString]) {
+                                                        <TooltipComponent Title="@GetLocalizedString("Afficher cette catégorie")" Placement="top">
+                                                            <span><i class="fas fa-eye carto_button_icon small"></i></span> 
                                                         </TooltipComponent>
                                                     }
                                                     else {
-                                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
-                                                            <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
+                                                        <TooltipComponent Title="@GetLocalizedString("Masquer cette catégorie")" Placement="top">
+                                                            <span><i class="fas fa-eye-slash carto_button_icon small"></i></span> 
                                                         </TooltipComponent>
                                                     }
-                                                </ChildContent>
-                                            </Button>
-                                        </AntDesign.Col>
-                                        @foreach(var lineId in linesByCategoryDict[category]) {
+                                            </button>
+                                        </div>
+                                        @foreach(var lineId in linesByCategoryDict[emptyString]) {
                                             LineSelection selectedLine = GetSelectedLine(lineId);
                                             Flowly.Api.Map.ApiLine line = linesDict[lineId];
-                                            <AntDesign.Col Span="8">
-                                                <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
+                                            <div class="col-3" style="padding:0">
+                                                <TooltipComponent Title="@line.Name">
                                                     <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
-                                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
-                                                                OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
-                                                        </Button>
+                                                        <button class="btn" style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
+                                                                @onclick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
+                                                        </button>
                                                     </div>
                                                 </TooltipComponent>
-                                            </AntDesign.Col>
+                                            </div>
                                         }
-                                    }
-                                    <AntDesign.Col Span="24">
-                                        <div><b style="@(LineCategoryFormattingString())">@GetLocalizedString("Autres Lignes")</b></div>
-                                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;position: absolute; right: 5%; top: -30%;" Size="Small" OnClick="() => ToggleCategoryHide(emptyString)">
-                                            <ChildContent>
-                                                @if (categoryHideDict[emptyString]) {
-                                                    <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Afficher cette catégorie")">
-                                                        <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
-                                                    </TooltipComponent>
-                                                }
-                                                else {
-                                                    <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Masquer cette catégorie")">
-                                                        <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                                    </TooltipComponent>
-                                                }
-                                            </ChildContent>
-                                        </Button>
-                                    </AntDesign.Col>
-                                    @foreach(var lineId in linesByCategoryDict[emptyString]) {
-                                        LineSelection selectedLine = GetSelectedLine(lineId);
-                                        Flowly.Api.Map.ApiLine line = linesDict[lineId];
-                                        <AntDesign.Col Span="8">
-                                            <TooltipComponent Placement="@Placement.Bottom" Title="@line.Name">
-                                                <div @onmouseenter="() => LineButtonMouseEnterEvent(selectedLine)" @onmouseleave="() => LineButtonMouseLeaveEvent(selectedLine)">
-                                                    <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, selectedLine.Display, lineButtonWidth))"
-                                                            OnClick="() => LineButtonClickHandler(selectedLine)">@RemoveLineFromString(line.Id)
-                                                    </Button>
-                                                </div>
-                                            </TooltipComponent>
-                                        </AntDesign.Col>
-                                    }
+                                    </div>
                                 </div>
                             </div>
                         }
                     </div>
+                    @if (!CollapsedSider){
+                        <div class="container">
+                            <div class="row">
+                                <div class="col text-center">
+                                    <button type="button" class="btn btn-outline-primary carto_bottom_button" @onclick=ToggleLineRemoval>
+                                            @if (removeLines){
+                                                <span><i class="fas fa-eye-slash carto_button_icon small"></i></span> 
+                                                <span class="carto_button_text small">@GetLocalizedString("Lignes Masquées")</span>
+                                            }
+                                            else{
+                                                <span><i class="fas fa-eye carto_button_icon small"></i></span>
+                                                <span class="carto_button_text small">@GetLocalizedString("Lignes Grisées")</span>
+                                            }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 }
-                @if (!CollapsedSider){
-                    <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=ToggleLineRemoval>
-                        <ChildContent>
-                            @if (removeLines){
-                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                <span class="carto_button_text">@GetLocalizedString("Lignes Masquées")</span>
-                            }
-                            else{
-                                <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
-                                <span class="carto_button_text">@GetLocalizedString("Lignes Grisées")</span>
-                            }
-                        </ChildContent>
-                    </Button>
-                }
-            </ChildContent>
-        </TabPane>
-        @if (!CollapsedSider) {
-            <TabPane Key="2">
-                <TabTemplate>
-                    <span><AntDesign.Icon Type="unordered-list" Theme="outline"/>@GetLocalizedString("Sélection")</span>
-                </TabTemplate>
-                <ChildContent>
+            </div>
+            @if (!CollapsedSider){
+                <div id="selection" class="tab-pane fade">
                     @{
                         string selectionDivString;
                         if(isMobileView) {
                             selectionDivString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden;";
                         }
                         else {
-                            selectionDivString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                            selectionDivString = $"max-height: calc(100vh - 155px); overflow-y:auto; overflow-x:hidden; padding-top: 10pt;";
                         }
-                      
-                        <div style=@selectionDivString>
+                        
+                        <div id="selection_subdiv" style=@selectionDivString>
                             @foreach (LineSelection selectedLine in SelectedLines){
                                 @if(selectedLine.Display){
                                     Flowly.Api.Map.ApiLine line = linesDict[selectedLine.LineId];
                                     Flowly.Api.Map.ApiVariation selectedVariation = line.Roads[selectedLine.Direction].Variations[selectedLine.VariationNumber];
-                                    string linkStyle = $"font-size: 12pt; color: black; display: inline-block; width: 140pt; vertical-align: middle;";
-                                    string divStyle = $"word-spacing: {lineSelectionWordSpacing}px;";
+                                    string linkStyle = $"font-size: 12pt; display: inline-block; width: 155pt; vertical-align: middle;";
+                                    string divStyle = $"word-spacing: {lineSelectionWordSpacing}px; margin: 3.5pt 0pt 3.5pt 3.5pt;";
                                     <div style=@divStyle>
-                                        <Button Style="@(LineButtonFormattingString(line.ForeColor, line.Color, true, 70))" 
-                                                        OnClick="() => ToggleSelectedLineDevelopment(selectedLine)">
+                                        <button class="btn" style="@(LineButtonFormattingString(line.ForeColor, line.Color, true, 70))" 
+                                                        @onclick="() => ToggleSelectedLineDevelopment(selectedLine)">
                                             @RemoveLineFromString(line.Id)
-                                        </Button>
+                                        </button>
                                         <a href="" @onclick="@(() => ToggleSelectedLineDevelopment(selectedLine))" @onclick:preventDefault style=@linkStyle>@selectedVariation.Description</a>
-                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Changer de direction")">
-                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small" OnClick="() => ChangeSelectedLineDirection(selectedLine)">
+                                        <TooltipComponent Title="@GetLocalizedString("Changer de direction")" Placement="top">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius: 5px; padding: 0.5rem 0.7rem" @onclick="() => ChangeSelectedLineDirection(selectedLine)">
                                                 @if (selectedLine.Direction == 0) {
-                                                    <AntDesign.Icon Type="arrow-right" Theme="outline"/>
+                                                    <span><i class="fas fa-arrow-right"></i></span>     
                                                 }
                                                 else {
-                                                    <AntDesign.Icon Type="arrow-left" Theme="outline"/>
+                                                    <span><i class="fas fa-arrow-left"></i></span>  
                                                 }
-                                            </Button>
+                                            </button>
                                         </TooltipComponent>
-                                        <TooltipComponent Placement="@Placement.Top" Title="@GetLocalizedString("Enlever de la sélection")">
-                                            <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small" OnClick="() => RemoveSelectedLineFromDisplay(selectedLine)">
-                                                <AntDesign.Icon Type="close" Theme="outline"/>
-                                            </Button>
+                                        <TooltipComponent Title="@GetLocalizedString("Enlever de la sélection")" Placement="top">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" style="border-radius: 5px; padding: 0.5rem 0.7rem;" 
+                                                     @onclick="() => RemoveSelectedLineFromDisplay(selectedLine)">
+                                                <i class="fas fa-times carto_button_icon"></i>
+                                            </button>
                                         </TooltipComponent>
                                     </div>
                                     @if((selectedLine != SelectedLines[SelectedLines.Length-1]) && !selectedLine.Develop) {
-                                        <Divider Style="margin: 10pt 0" />
+                                        <span class="horizontal_divider" style="margin: 10pt 0" />
                                     }
                                     @if (selectedLine.Develop) {
                                         Flowly.Api.Map.ApiRoad selectedRoad = line.Roads[selectedLine.Direction];
                                         @if (selectedRoad.Variations.Length > 1) {
-                                            <AntDesign.Row Gutter="(8, 8)" Justify="space-around" Align="middle">
-                                                @foreach (Flowly.Api.Map.ApiVariation variation in selectedRoad.Variations) {
-                                                    <AntDesign.Col>
-                                                        <Button Style="@(VariantButtonFormattingString(line.ForeColor, line.Color, 1.0f - ((float)variation.Id / (float)selectedRoad.Variations.Length)))"
-                                                                    OnClick="() => ChangeSelectedVariation(selectedLine, variation.Id)">
-                                                            @variation.Description
-                                                        </Button>
-                                                    </AntDesign.Col>
-                                                }
-                                            </AntDesign.Row>
+                                            <div class="container-fluid" style="padding:0;">
+                                                <div class="row g-2" style="margin: 7pt -9pt 7pt 7pt;">
+                                                    @foreach (Flowly.Api.Map.ApiVariation variation in selectedRoad.Variations) {
+                                                            float opacity = 1.0f - ((float)variation.Id / (float)selectedRoad.Variations.Length);
+                                                            <div class="col" style="padding:0;">
+                                                            <button class="btn" style="@(VariantButtonFormattingString(line.Color, opacity))"
+                                                                    @onclick="() => ChangeSelectedVariation(selectedLine, variation.Id)">
+                                                                <p class="mb-0" style="@(VariantTextFormattingString(line.ForeColor, opacity))">@variation.Description</p>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
                                         }
                                         <ul class="station-list">
                                             @foreach (var stationRef in selectedVariation.Stations) {
@@ -209,108 +224,136 @@
                                                     spanStyle += "border-radius: 0px 0px 3px 3px";
                                                 }
                                                 <li class="station-list-item" @onmouseenter="() => StationMouseEnterEvent(selectedLine, stationIndex)" 
-                                                    @onclick="() => StationClickEvent()" @onmouseleave="() => StationMouseLeaveEvent(selectedLine, stationIndex)">
+                                                        @onclick="() => StationClickEvent()" @onmouseleave="() => StationMouseLeaveEvent(selectedLine, stationIndex)">
 
                                                     <span style=@spanStyle><i style="color: white; font-size:7pt; margin: 3pt 3pt;" class="fas fa-circle"></i></span>
                                                     <span style="position: relative; left: 20pt" >@station.Name</span>
                                                     @foreach(var connectingLine in apiMap.Lines.Reverse()) {
                                                         if(stationsConnectionDict[stationRef.Id].Contains(connectingLine.Id) && (connectingLine.Id != selectedLine.LineId)) {
                                                             Flowly.Api.Map.ApiLine correspondingLine = linesDict[connectingLine.Id];
-                                                            <Button Style="@(LineIconFormattingString(correspondingLine.ForeColor, correspondingLine.Color, 22, 18))">
+                                                            <span class="badge"  style="@(LineIconFormattingString(correspondingLine.ForeColor, correspondingLine.Color, 22, 18))">
                                                                 @RemoveLineFromString(connectingLine.Id)
-                                                            </Button>  
+                                                            </span>  
                                                         }
                                                     }
                                                 </li>
                                             }
                                         </ul>
-                                        <Divider />
+                                        <span class="horizontal_divider"/>
                                     } @* if *@
                                 } @* if *@
                             } @* foreach *@
                         </div>
                     }
-                    <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=HideAllSelectedLines>
-                        <ChildContent>
-                            <AntDesign.Icon Class="carto_button_icon" Type="close" Theme="outline"/>
-                            <span class="carto_button_text">@GetLocalizedString("Supprimer toutes les lignes sélectionnées")</span>
-                        </ChildContent>
-                    </Button>
-                </ChildContent>
-            </TabPane>
-            @if (DisplayVehicles) {            
-                <TabPane Key="3">
-                    <TabTemplate>
-                        <span><AntDesign.Icon Type="environment" Theme="outline"/>@GetLocalizedString("Véhicules")</span>
-                    </TabTemplate>
-                    <ChildContent>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col text-center">
+                            @if(CheckIfAllLinesAreHidden()) {
+                                <button type="button" class="btn btn-outline-primary carto_bottom_button" style="transform: none; left:27px;" @onclick=DisplayAllLines>
+                                        <span><i class="fas fa-eye carto_button_icon small"></i></span>
+                                        <span class="carto_button_text small">@GetLocalizedString("Afficher toutes les lignes")</span>
+                                </button> 
+                            }
+                            else {
+                                <button type="button" class="btn btn-outline-primary carto_bottom_button" style="transform: none; left:27px;" @onclick=HideAllLines>
+                                        <span><i class="fas fa-times carto_button_icon small"></i></span>
+                                        <span class="carto_button_text small">@GetLocalizedString("Masquer toutes les lignes")</span>
+                                </button>
+                            }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @if (DisplayVehicles) {
+                    <div id="vehicles" class="tab-pane fade">
                         @if(vehicleInitializationDone) {
                             string vehicleDivStyleString;
                             if(isMobileView) {
                                 vehicleDivStyleString = $"max-height:{GetHeaderHeight()}px; overflow-y:scroll; overflow-x:hidden; display: block";
                             }
                             else {
-                                vehicleDivStyleString = $"max-height:74vh; overflow-y:auto; overflow-x:hidden;";
+                                vehicleDivStyleString = $"max-height:calc(100vh - 155px); overflow-y:auto; overflow-x:hidden; padding-top: 10pt;";
                             }
-                            <div style=@vehicleDivStyleString>
-                                <Search Placeholder=@GetLocalizedString("Rechercher parmi les véhicules") AllowClear WrapperStyle="width: 100%;" 
-                                        @bind-Value="@vehicleFilteringString" OnChange="() => FilterVehicles()"/>
+                            <div id="vehicles_subdiv" class="px-2" style=@vehicleDivStyleString>
 
-                                @foreach (var position in filteredPositions) {
-                                    int layerIndex = Array.IndexOf(filteredPositions, position);
-                                    <div @onmouseenter="() => VehicleMouseEnterEvent(layerIndex)" @onmouseleave="() => VehicleMouseLeaveEvent(layerIndex)">
-                                        <Button Block Style="text-align: left; height: auto; border-radius: 5px;" OnClick="() => VehicleClickEvent(position)">
-                                            <ChildContent>
+
+                                <div class="input-group">
+                                    <input class="form-control" style="width: 90%; height: 30pt;" type="text" @bind-value="@vehicleFilteringString" @bind-value:event="oninput"
+                                           placeholder=@GetLocalizedString("Rechercher parmi les véhicules") @onkeyup="() => FilterVehicles()">
+                                    <button type="button" class="btn bg-transparent" style="color:grey; margin-left: -35px; z-index: 5; border: 0;" @onclick=OnVehicleSearchClear>
+                                        <i class="far fa-times-circle"></i>
+                                    </button>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-default" style="height: 30pt;" type="submit" @onclick="() => FilterVehicles()">
+                                            <i style="color:grey;" class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                                    if(!vehicleInfo.Filtered) {
+                                        <div @onmouseenter="() => VehicleMouseEnterEvent(vehicleInfo.Layer)" @onmouseleave="() => VehicleMouseLeaveEvent(vehicleInfo.Layer)">
+                                            <button class="btn text-secondary btn-outline-light border-0" style="width: 100%; text-align: left; height: auto; border-radius: 5px;" @onclick="() => VehicleClickEvent(vehicleInfo.Position)">
                                                 <span>
-                                                    <span ><i style="@StateCircleFormattingString(position.State, 6)" class="fas fa-circle"></i>
-                                                        <i style="color: black; font-size: 10pt;" class=@position.Icon></i></span>
-                                                    @if((position.Vehicle != null) && (position.VehicleId != null)) {
-                                                        <b style="font-size: 12pt;">@position.Vehicle</b>
-                                                        <span style="font-size: 12pt;">(@position.VehicleId)</span>
+                                                    <span>
+                                                        <i style="@StateCircleFormattingString(vehicleInfo.Position.State, 6)" class="fas fa-circle"></i>
+                                                        <i style="color: black; font-size: 10pt;" class=@vehicleInfo.Position.Icon></i>
+                                                    </span>
+                                                    @if((vehicleInfo.Position.Vehicle != null) && (vehicleInfo.Position.VehicleId != null)) {
+                                                        <b style="font-size: 12pt;">@vehicleInfo.Position.Vehicle</b>
+                                                        <span style="font-size: 12pt;">(@vehicleInfo.Position.VehicleId)</span>
                                                     }
                                                     else {
                                                         <span style="font-size: 12pt;">@GetLocalizedString("Non Renseigné")</span>
                                                     }
-                                                    @foreach (ApiDevice device in position.Devices) {
+                                                    @foreach (ApiDevice device in vehicleInfo.Position.Devices) {
                                                         string spanContent = $"{device.DeviceId}";
                                                         <div style="margin:0;"><i style="@StateCircleFormattingString(device.State, 4)" class="fas fa-circle"></i>
                                                         <span style="font-size:9pt; word-spacing:4pt;">@spanContent</span></div>
                                                     }
-                                                 </span>
-                                                 <span style="position: relative;"><i style="@PeopleIconFormattingString(position.Load)" class="fas fa-users"></i></span>
-                                            </ChildContent>
-                                        </Button>
-                                    </div>
+                                                </span>
+                                                <span style="position: relative;">
+                                                    <i style="@PeopleIconFormattingString(vehicleInfo.Position.Load)" class="fas fa-users"></i>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    }
                                 } @* foreach *@
                             </div>
-                            <Button Type="@ButtonType.Primary" Ghost Class="carto_bottom_button" OnClick=ToggleVehiclesDisplay>
-                                <ChildContent>
-                                    @if (hideVehicles){
-                                        <AntDesign.Icon Class="carto_button_icon" Type="eye" Theme="outline"/>
-                                        <span class="carto_button_text">@GetLocalizedString("Afficher les véhicules")</span>
-                                    }
-                                    else{
-                                        <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                        <span class="carto_button_text">@GetLocalizedString("Masquer les véhicules")</span>
-                                    }
-                                </ChildContent>
-                            </Button>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <button type="button" class="btn btn-outline-primary carto_bottom_button" @onclick=ToggleVehiclesDisplay>
+                                                @if (hideVehicles){
+                                                    <span><i class="fas fa-eye carto_button_icon small"></i></span>
+                                                    <span class="carto_button_text small">@GetLocalizedString("Afficher les véhicules")</span>
+                                                }
+                                                else{
+                                                    <span><i class="fas fa-eye-slash carto_button_icon small"></i></span>
+                                                    <span class="carto_button_text small">@GetLocalizedString("Masquer les véhicules")</span>
+                                                }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         }
                         else
                         {
                             <b>@GetLocalizedString("Accès à la position des véhicules impossible")</b>
                         }
-                    </ChildContent>
-                </TabPane>
-
-            } @* if *@
-        }
-    </Tabs>
+                    </div>
+                }
+            }
+        </div>
     }
     else
     {
         <div style="text-align: center;"><b> @GetLocalizedString("Chargement des données de cartographie") </b></div>
-        <div style="text-align: center;"><Spin/></div>
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+            </div>
+        </div>
     }  
 }
 
@@ -355,7 +398,6 @@
     private Dictionary<string,Flowly.Api.Map.ApiLine> linesDict;
     private Dictionary<string, List<string>> linesByCategoryDict;
     private Dictionary<string, bool> categoryHideDict;
-    private Layer[] vehicleLayers;
     private BlazorLeaflet.Models.Icon stationIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Station.png", Width = 10, Height = 10};
     private BlazorLeaflet.Models.Icon terminusIcon = new BlazorLeaflet.Models.Icon { Url = "assets/Terminus.png", Width = 10, Height = 10};
     public LineSelection[] SelectedLines { get; set; }
@@ -363,9 +405,8 @@
     private Dictionary<string, ApiStopTime[]> stopTimesDict;  // "LineId Direction VariationId StationId" -> StopTimes
     private bool hideVehicles;
     private bool removeLines = true;
-    private string siderTabsActiveKey = "1";
     private string vehicleFilteringString = "";
-    private ApiPosition[] filteredPositions;
+    private List<VehicleInfo> vehiclesInfo;
     private bool closeStationPopup = true;
 
     #if DEBUG
@@ -385,19 +426,23 @@
         lineSelectionWordSpacing = Parent.lineSelectionWordSpacing;
         menuWidth = Parent.menuWidth;
         windowHeight = Parent.WindowHeight;
-
+        string configUrl = config["ApiUrl"];
+        if (String.IsNullOrEmpty(configUrl)) {
+            Uri uri = new Uri(navigationManager.BaseUri);
+            configUrl = uri.Scheme + "://" + uri.Host + "/";
+        }
 
         Task<ApiStopTimes> stopTimesTask = null;
         Task<ApiMap> mapTask = null;
         Task<ApiPositions> positionsTask = null;
         try
         {
-            stopTimesTask = Task.Run<ApiStopTimes>(() => StopTimesDataService.GetApiStopTimesDataAsync(config["ApiUrl"]));  
+            stopTimesTask = Task.Run<ApiStopTimes>(() => StopTimesDataService.GetApiStopTimesDataAsync(configUrl));  
 
-            mapTask = Task.Run<ApiMap>(() => MapDataService.GetApiMapDataAsync(config["ApiUrl"]));
+            mapTask = Task.Run<ApiMap>(() => MapDataService.GetApiMapDataAsync(configUrl));
 
             if(DisplayVehicles) {
-                positionsTask = Task.Run<ApiPositions>(() => PositionsDataService.GetApiPositionsDataAsync(config["ApiUrl"]));
+                positionsTask = Task.Run<ApiPositions>(() => PositionsDataService.GetApiPositionsDataAsync(configUrl));
             }
 
             apiStopTimes = await stopTimesTask;
@@ -539,9 +584,7 @@
 
                 if((apiPositions != null) && (apiPositions.Positions != null))
                 {
-                    vehicleLayers = new Layer[apiPositions.Positions.Length];
                     DisplayAllVehicles();
-                    filteredPositions = new ApiPosition[apiPositions.Positions.Length];
                     FilterVehicles();
                     vehicleInitializationDone = true;
                 }
@@ -561,11 +604,21 @@
         {
             Console.WriteLine("Exception during the initialization, Message: " + ex.Message);
         }
+        TimeZoneInfo conversion = TimeZoneConverter.TZConvert.GetTimeZoneInfo(apiMap.Location);
+        DateTime time = TimeZoneInfo.ConvertTime(UnixTimeStampStringToDateTime(apiStopTimes.ServerTime), conversion);
+        await JSInterops.SetServerTime(jsRuntime, time.Hour.ToString("00"), time.Minute.ToString("00"));
 
         // Timer to reload real time data every minute
         Timer reloadRealTimeTimer = new Timer(60000);
         reloadRealTimeTimer.Elapsed += ReloadRealTimeEvent;
         reloadRealTimeTimer.Enabled = true;  
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        await base.OnAfterRenderAsync(firstRender);
+        await JSInterops.WindowResize(jsRuntime);
+        await JSInterops.InitTooltips(jsRuntime);
+        await JSInterops.InitPopovers(jsRuntime);
     }
 
     private void InitializeCategories() {
@@ -598,17 +651,22 @@
     }
 
     private async Task ReloadRealTimeTask() {
+
+        string configUrl = config["ApiUrl"];
+        if (String.IsNullOrEmpty(configUrl)) {
+            Uri uri = new Uri(navigationManager.BaseUri);
+            configUrl = uri.Scheme + "://" + uri.Host + "/";
+        }
+
         if(DisplayVehicles) {
             try {
-                apiPositions = await PositionsDataService.GetApiPositionsDataAsync(config["ApiUrl"]);
+                apiPositions = await PositionsDataService.GetApiPositionsDataAsync(configUrl);
 
                 if ((apiPositions != null) && (apiPositions.Positions != null)) {
                     if (!hideVehicles)
                     {
                         RemoveAllVehicles();
-                        Array.Resize(ref vehicleLayers, apiPositions.Positions.Length);
                         DisplayAllVehicles();
-                        Array.Resize(ref filteredPositions, apiPositions.Positions.Length);
                         FilterVehicles();
                     }
                     vehicleInitializationDone = true;
@@ -626,7 +684,7 @@
 
         try
         {
-            apiStopTimes = await StopTimesDataService.GetApiStopTimesDataAsync(config["ApiUrl"]);
+            apiStopTimes = await StopTimesDataService.GetApiStopTimesDataAsync(configUrl);
             if (apiStopTimes != null) {
                 //Update stopTimesDict
                 stopTimesDict.Clear();
@@ -652,16 +710,25 @@
                     foreach (var stationRef in selectedVariation.Stations) {
                         Layer[] layers = lineLayersDict[line.Id];
                         Layer stationLayer = layers[stationLayerIndex++];
-                        CreateStationPopupContent(selectedLine, stationRef.Id);
+                        stationLayer.Popup.Content = CreateStationPopupContent(selectedLine, stationRef.Id);
                         Parent.map.UpdatePopupContent(stationLayer);
                     }
                 }
             }
+
+            if (apiStopTimes != null) {
+                TimeZoneInfo conversion = TimeZoneConverter.TZConvert.GetTimeZoneInfo(apiMap.Location);
+                DateTime time = TimeZoneInfo.ConvertTime(UnixTimeStampStringToDateTime(apiStopTimes.ServerTime), conversion);
+                await JSInterops.SetServerTime(jsRuntime, time.Hour.ToString("00"), time.Minute.ToString("00"));
+            }
+
         }
         catch (Exception ex)
         {
             Console.WriteLine("Exception during the stop times initialization, no stop times will be displayed. Message: " + ex.Message);
         }
+
+
         StateHasChanged();
     }
 
@@ -713,7 +780,7 @@
                 NoClipEnabled = false,
                 Tooltip = new BlazorLeaflet.Models.Tooltip { 
                     IsSticky = true, 
-                    Content = $"<Button Style=\"{LineIconFormattingString(line.ForeColor, line.Color, 30, 20)}\">{RemoveLineFromString(line.Id)}</Button>" }             
+                    Content = $"<span class=\"badge\" style=\"{LineIconFormattingString(line.ForeColor, line.Color, 22, 18)}\">{RemoveLineFromString(line.Id)}</span>" }             
             };
             Parent.map.AddLayer(polyLine);
             lineLayers[2] = polyLine;
@@ -745,8 +812,8 @@
         Flowly.Api.Map.ApiStation station = stationsDict[stationId];
         string key = $"{selectedLine.LineId} {selectedLine.Direction} {selectedLine.VariationNumber} {stationId}";
 
-        string stationPopupString = $"<div style= \"font-size: 9pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:0.4rem;" +
-                $"justify-content:center; text-align: center; margin:10pt 0pt;\">{station.Name}</div>" +
+        string stationPopupString = $"<div style= \"min-width:210pt; font-size: 10pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:0.4rem;" +
+                $"justify-content:center; text-align: center; margin:10pt 0pt; line-height: 11pt;\">{station.Name}</div>" +
                 GetStopTimesLineString(line, key, out stopTimesFound);
 
         foreach(var connectingLine in apiMap.Lines) {
@@ -820,6 +887,7 @@
                 if (line.Category == category)
                 {
                     DisplaySelectedLine(selectedLine, false);
+                    DisplayVehiclesFromLine(selectedLine.LineId, true);
                     selectedLine.Display = true;
                 }
             }
@@ -836,11 +904,13 @@
                     } else {
                         DisplaySelectedLine(selectedLine, true);
                     }
+                    HideVehiclesFromLine(selectedLine.LineId, true);
                     selectedLine.Display = false;
                     selectedLine.Develop = false;
                 }
             }
         }
+        HideVehiclesFromNonSelectedLines();
         StateHasChanged();
     }
 
@@ -897,11 +967,12 @@
             stopTimesFound = true;
         } //if
         else {
-            stopTimesHtmlString = GetLocalizedString("Plus de passage aujourd'hui");
+            stopTimesHtmlString = " " + GetLocalizedString("Plus de passage aujourd'hui");
             stopTimesFound = false;
         }
-        return $"<div><Button Style=\"color: #{line.ForeColor}; background: #{line.Color}; width: {lineButtonWidth*6/10}px; height: 20pt;" +
-               $"border-style: none; border-radius: 5px; margin-top:3pt;\"> {RemoveLineFromString(line.Id)}</Button>" + stopTimesHtmlString +"</div>";
+        return $"<div style=\"margin-top: 2pt;\"><button class=\"badge\" style=\"font-size: 9pt; color: #{line.ForeColor}; background: #{line.Color}; width: {lineButtonWidth*6/10}px; height: 17pt;" +
+               $"border-style: none; border-radius: 5px; padding: 0;\"> {RemoveLineFromString(line.Id)}</button>" +
+               stopTimesHtmlString + "</div>";
     }
 
     private string GetSingleStopTimeString(ApiStopTime stopTime) {
@@ -926,8 +997,8 @@
             string color = line.Color;
             double opacity = 1.0;
             if (greyPolyline) {
-                color = "D5D9DC";
-                opacity = 0.5;
+                color = "9FA6AD";
+                opacity = 0.7;
             }
             int colorInt = int.Parse(color, System.Globalization.NumberStyles.HexNumber);
             int weight = line.Weight;
@@ -938,7 +1009,7 @@
             Path polyLineBorders = (Path)layers[0];
             polyLineBorders.Fill = false;
             polyLineBorders.StrokeWidth = weight + 9;
-            polyLineBorders.StrokeOpacity = 1.0;
+            polyLineBorders.StrokeOpacity = 0.5;
             polyLineBorders.StrokeColor = System.Drawing.Color.White;
             Parent.map.SetPathOptions((Path)polyLineBorders);
 
@@ -995,7 +1066,6 @@
             }
             Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
         }
-
     }
 
     private string LineCategoryFormattingString() {
@@ -1003,7 +1073,7 @@
             return "margin-left: 2pt;";
         }
         else {
-            return "padding: 8pt;";
+            return "margin-left: 4pt;";
         }
     }
 
@@ -1017,23 +1087,36 @@
         }
         else {
             height = "40";
-            margin_string = "margin-left: 5px; margin-top: 5px; margin-bottom: 5px;";
+            margin_string = "margin-left: 3.5pt; margin-top: 3.5pt; margin-bottom: 3.5pt;";
         }
 
-        if (!display) {
+        if (display) {
+            removedFormattingString = "border-style: none;";
+        }
+        else{
             removedFormattingString = "border-color: lightgrey; border-style: solid; border-width: 3px;";
             color = color + "80";
         }
-        return ($"color: #{textcolor}; background: #{color}; min-width: {width}px; height: {height}px; {removedFormattingString}" +
-                $"border-radius: 5px; {margin_string}; padding 0px 4px;");
+        return ($"color: #{textcolor}; background: #{color}; min-width: {width}px; height: {height}px; {removedFormattingString} " +
+                $"border-radius: 5px; {margin_string} padding: 0px 4px;");
     }
 
     private string LineIconFormattingString(string textcolor, string color, int iconWidth, int iconHeight) {
-        return ($"color: #{textcolor}; background: #{color}; min-width: {iconWidth}px; height: {iconHeight}px; border-radius: 4px; padding: 0px 0px; font-size: 80%; float: right; margin-right: 5px");
+        return ($"color: #{textcolor}; background: #{color}; min-width: {iconWidth}px; height: {iconHeight}px; border-radius: 4px; padding: 3px; font-size: 75%; float: right; margin-right: 2pt; line-height: {iconHeight*7/11}px;");
     }
 
-    private string VariantButtonFormattingString(string fontColor, string color, float opacity) {
+    private string LineIconFormatForVehiclePopup(string textcolor, string color, int iconWidth, int iconHeight) {
+        return ($"color: #{textcolor}; background: #{color}; min-width: {iconWidth}px; min-height: {iconHeight}px; border-radius: 4px; font-size: 100%; margin-right: 7pt; margin-bottom: 5pt; line-height: {iconHeight*16/20}px;");
+    }
+
+    private string VariantButtonFormattingString(string color, float opacity) {
         string rgba = GenerateRgba(color, opacity);
+
+        //return $"display: inline-block; font-size: 10pt; color: {fontColor}; background-color: {rgba}; width: {lineButtonWidth*85/40}px; height: 60px; white-space: normal; overflow:hidden";
+        return $"background-color: {rgba}; width: {lineButtonWidth*85/40}px; height: 60px; margin-bottom: 3.5pt; border-style: none;";
+    }
+
+    private string VariantTextFormattingString(string fontColor, float opacity) {
         if(opacity < 0.25f) {
             fontColor = "black";
         }
@@ -1041,7 +1124,7 @@
             fontColor = "#" + fontColor;
         }
 
-        return $"display: inline-block; font-size: 10pt; color: {fontColor}; background-color: {rgba}; width: {lineButtonWidth*18/10}px; height: 60px; white-space: normal;";
+        return $"display: -webkit-box; font-size: 10pt; color: {fontColor}; white-space: normal; -webkit-line-clamp: 2; -webkit-box-orient: vertical;  text-overflow: ellipsis; overflow: hidden;";
     }
 
     private string GetStateColor(int state) {
@@ -1093,17 +1176,35 @@
         return input.Remove(0, 6);
     }
 
-    private BlazorLeaflet.Models.Icon GetVehicleIcon(string iconString, int load, int state) {
+    //private BlazorLeaflet.Models.Icon GetVehicleIcon(string iconString, string lineColor, string foreColor, int load, int state) {
+    //    return new BlazorLeaflet.Models.Icon { 
+    //    Url = $"<div style=\"background-repeat: no-repeat; background-position: center; background: #{foreColor}; border-radius: 50%; height: 26pt; width:26pt;\">" +
+    //          $"<div style=\"background-repeat: no-repeat; background-position: center; background: #{lineColor};" +
+    //          $"border-radius: 50%; height: 24pt; width:24pt; transform:translate(1pt,1pt);\">" +
+    //          $"<div style=\"background-repeat: no-repeat; background-position: center; background: rgb(255,255,255, 1);" +
+    //          $"border-radius: 50%; height: 22pt; width:22pt; transform:translate(1pt,1pt);\">" +
+    //          $"<i style=\"color:#{lineColor}; font-size: 14pt; position:relative; left: 0.3rem;top: 0.3rem;\" class=\"{iconString}\"></i>" +
+    //          $"<i style=\"color:{GetStateColor(state)}; font-size: 0.3rem; position:relative; right: 1.3rem; bottom: 0.5rem;\" class=\"fas fa-circle\"></i></div></div></div>"};
+    //
+    //}
+
+    private BlazorLeaflet.Models.Icon GetVehicleIcon(string iconString, string lineColor, string foreColor, int load, int state) {
+        string vehicleIconLeftPosition = "0.3";
+        if(iconString == "fas fa-train") {
+            vehicleIconLeftPosition = "0.35";
+        }
         return new BlazorLeaflet.Models.Icon { 
-        Url = $"<div style=\"background-repeat: no-repeat; background-position: center; background: rgb(255,255,255, 1); border-radius: 50%; height: 22pt; width:22pt;\">" +
-              $"<i style=\"color:grey; font-size: 14pt; position:relative; left: 0.3rem;top: 0.3rem;\" class=\"{iconString}\"></i>" +
-              $"<i style=\"color:{GetStateColor(state)}; font-size: 0.3rem; position:relative; right: 1.3rem; bottom: 0.5rem;\" class=\"fas fa-circle\"></i></div>"};
+        Url = $"<div style=\"background-repeat: no-repeat; background-position: center; background: #{lineColor}; border-radius: 50%; height: 26pt; width:26pt;\">" +
+              $"<div style=\"background-repeat: no-repeat; background-position: center; background: rgb(255,255,255, 1);" +
+              $"border-radius: 50%; height: 22pt; width:22pt; transform:translate(2pt,2pt);\">" +
+              $"<i style=\"color:#{lineColor}; font-size: 14pt; position:relative; left: {vehicleIconLeftPosition}rem; top: 0.35rem;\" class=\"{iconString}\"></i>" +
+              $"<i style=\"color:{GetStateColor(state)}; font-size: 0.3rem; position:relative; right: 1.5rem; bottom: 0.6rem;\" class=\"fas fa-circle\"></i></div></div></div>"};
 
     }
 
     public void ResetSiderTabsActiveKey (bool collapsed) {
         if(collapsed) {
-            siderTabsActiveKey = "1";
+            JSInterops.SetActiveTab(jsRuntime, "tabs_carto", "lines");
             StateHasChanged();
         }
     }
@@ -1118,6 +1219,7 @@
             }
             selectedLine.Display = false;
             selectedLine.Develop = false;
+            HideVehiclesFromLine(selectedLine.LineId, true);
             if(CheckAllCategoryLinesDisplayStatus(line.Category, false)) {
                 categoryHideDict[line.Category] = true;
             }
@@ -1125,6 +1227,7 @@
         else{
             DisplaySelectedLine(selectedLine, false);
             selectedLine.Display = true;
+            DisplayVehiclesFromLine(selectedLine.LineId, true);
             if(CheckAllCategoryLinesDisplayStatus(line.Category, true)) {
                 categoryHideDict[line.Category] = false;
             }
@@ -1132,13 +1235,13 @@
         StateHasChanged();
     }
 
-    private void LineButtonMouseEnterEvent(LineSelection Buttonline) {
+    private void LineButtonMouseEnterEvent(LineSelection buttonLine) {
         List<Path> pathList = new List<Path>();
         Path path;
         if(removeLines) {
             List<String> markerIdList = new List<String>();
             foreach (var selectedLine in SelectedLines) {
-                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                if((selectedLine.Display == true)&&(selectedLine != buttonLine)) {
                     Layer[] layers = lineLayersDict[selectedLine.LineId];
                     for (int i = 0; i<NUMBER_LAYERS_POLYLINE; i++) {
                         path = (Path)layers[i];
@@ -1148,35 +1251,38 @@
                     for (int i = NUMBER_LAYERS_POLYLINE; i<layers.Length; i++) {
                         markerIdList.Add(layers[i].Id);
                     }
+                    HideVehiclesFromLine(selectedLine.LineId, false);
                 }
             }
             Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
         }
         else{
             foreach (var selectedLine in SelectedLines) {
-                if((selectedLine.Display == true)&&(selectedLine != Buttonline)) {
+                if((selectedLine.Display == true)&&(selectedLine != buttonLine)) {
                     Layer[] layers = lineLayersDict[selectedLine.LineId];
                     path = (Path)layers[NUMBER_LAYERS_POLYLINE-1];
-                    path.StrokeOpacity = 0.5;
-                    path.StrokeColor = System.Drawing.Color.FromArgb(213, 217, 220);
+                    path.StrokeOpacity = 0.7;
+                    path.StrokeColor = System.Drawing.Color.FromArgb(159, 166, 173);
                     pathList.Add(path);
+                    HideVehiclesFromLine(selectedLine.LineId, false);
                 }
             }
         }
-
         Parent.map.SetPathOptionsList(pathList.ToArray());
 
-        if(Buttonline.Display == false) {
-            DisplaySelectedLine(Buttonline, false);
+        if(buttonLine.Display == false) {
+            DisplaySelectedLine(buttonLine, false);
+            DisplayVehiclesFromLine(buttonLine.LineId, false);
         }
         for(int i =0;i<NUMBER_LAYERS_POLYLINE;i++){
-            Layer polylineLayer = lineLayersDict[Buttonline.LineId][i];
+            Layer polylineLayer = lineLayersDict[buttonLine.LineId][i];
             Parent.map.BringPathToFront((Path)polylineLayer);
         }
+        HideNotAssignedVehicles();
 
         // Fit Map to the line bounds ?
-        //Flowly.Api.Map.ApiLine line = linesDict[Buttonline.LineId];
-        //Flowly.Api.Map.ApiVariation variant = line.Roads[Buttonline.Direction].Variations[Buttonline.VariationNumber];
+        //Flowly.Api.Map.ApiLine line = linesDict[buttonLine.LineId];
+        //Flowly.Api.Map.ApiVariation variant = line.Roads[buttonLine.Direction].Variations[buttonLine.VariationNumber];
         //Single[] bounds = StringUtils.ExtractBoundsFromString(variant.Bounds);
         //Parent.map.FitBounds(new PointF(bounds[0], bounds[1]), new PointF(bounds[2], bounds[3]));
     }
@@ -1198,6 +1304,7 @@
                     for (int i = NUMBER_LAYERS_POLYLINE; i<layers.Length; i++) {
                         markerIdList.Add(layers[i].Id);
                     }
+                    DisplayVehiclesFromLine(selectedLine.LineId, false);
                 }
             } 
             Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 1.0f);
@@ -1213,11 +1320,13 @@
                     path.StrokeOpacity = 1.0;
                     path.StrokeColor = System.Drawing.Color.FromArgb(colorInt);
                     pathList.Add(path);
+                    DisplayVehiclesFromLine(selectedLine.LineId, false);
                 }
             }
         }
 
         Parent.map.SetPathOptionsList(pathList.ToArray());
+        DisplayNotAssignedVehicles();
 
         if(buttonLine.Display == false) {
             if(removeLines) {
@@ -1225,7 +1334,20 @@
             } else {
                 DisplaySelectedLine(buttonLine, true);
             }
+            HideVehiclesFromLine(buttonLine.LineId, false);
         }
+    }
+
+    private bool CheckIfAllLinesAreHidden() {
+        bool result = true;
+        foreach( var selectedLine in SelectedLines)
+        {
+            if (selectedLine.Display == true)
+            {
+                result = false;
+            }
+        }
+        return result;
     }
 
     private void ToggleLineRemoval() {
@@ -1278,6 +1400,7 @@
         }
         selectedLine.Display = false;
         selectedLine.Develop = false;
+        HideVehiclesFromLine(selectedLine.LineId, true);
         StateHasChanged();
     }
 
@@ -1313,13 +1436,14 @@
         }
     }
 
-    private void HideAllSelectedLines() {
+    private void HideAllLines() {
         foreach (LineSelection selectedLine in SelectedLines) {
             if(removeLines) {
                 HideSelectedLine(selectedLine);
             } else {
                 DisplaySelectedLine(selectedLine, true);
             }
+            HideVehiclesFromLine(selectedLine.LineId, true);
             selectedLine.Display = false;
             selectedLine.Develop = false;
         }
@@ -1329,30 +1453,43 @@
         ResetSiderTabsActiveKey(true);
     }
 
+    private void DisplayAllLines() {
+        foreach (LineSelection selectedLine in SelectedLines) {
+
+            DisplaySelectedLine(selectedLine,false);
+            DisplayVehiclesFromLine(selectedLine.LineId, true);
+            selectedLine.Display = true;
+        }
+        foreach (var category in categoryHideDict.Keys) {
+            categoryHideDict[category] = false;
+        }
+    }
+
+    private void OnVehicleSearchClear() {
+        vehicleFilteringString="";
+        FilterVehicles();
+    }
+
     private void FilterVehicles() {
-        int layerIndex = 0;
-        int filteredPositionsIndex = 0;
         List<String> markerIdListToHide = new List<String>();
         List<String> markerIdListToShow = new List<String>();
         if ((vehicleFilteringString != null) && (vehicleFilteringString != "")) {
-            Array.Clear(filteredPositions);
 
-            foreach (var position in apiPositions.Positions) {
+            foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
                 bool vehicleFound = false;
-                Layer vehicleLayer = vehicleLayers[layerIndex];
 
-                if(position.Vehicle != null) {
-                    if(VehicleFilterMatch(position.Vehicle.ToLower())) {
+                if(vehicleInfo.Position.Vehicle != null) {
+                    if(VehicleFilterMatch(vehicleInfo.Position.Vehicle.ToLower())) {
                         vehicleFound=true;
                     }
                 }
-                else if (position.VehicleId != null) {
-                    if(VehicleFilterMatch(position.VehicleId.ToString())) {
+                else if (vehicleInfo.Position.VehicleId != null) {
+                    if(VehicleFilterMatch(vehicleInfo.Position.VehicleId.ToString())) {
                         vehicleFound=true;
                     }
                 }
                 else {
-                    foreach (var device in position.Devices) {
+                    foreach (var device in vehicleInfo.Position.Devices) {
                         if(VehicleFilterMatch(device.DeviceId)) {
                             vehicleFound=true;
                         }
@@ -1360,36 +1497,140 @@
                 }
 
                 if(vehicleFound) {
-                    filteredPositions[filteredPositionsIndex++] = position;
-                    markerIdListToShow.Add(vehicleLayer.Id);
+                    vehicleInfo.Filtered=false;
+                    if(!vehicleInfo.Hidden) {
+                        markerIdListToShow.Add(vehicleInfo.Layer.Id);
+                    } 
                 }
                 else {
-                    markerIdListToHide.Add(vehicleLayer.Id);
+                    vehicleInfo.Filtered=true;
+                    markerIdListToHide.Add(vehicleInfo.Layer.Id);
                 }
-                layerIndex++;
             }
-            Array.Resize(ref filteredPositions, filteredPositionsIndex);
-            Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
-            Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
-            StateHasChanged();
-        }
-        else {
-            Array.Resize(ref filteredPositions, apiPositions.Positions.Length);
-            if (vehicleInitializationDone) {
-                foreach (var position in apiPositions.Positions) {
-                    filteredPositions[filteredPositionsIndex++] = position;
-                    Layer vehicleLayer = vehicleLayers[layerIndex++];
-                    markerIdListToShow.Add(vehicleLayer.Id);
-                }
-
+            if (!hideVehicles) {
+                Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
                 Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
                 StateHasChanged();
             }
-            else {
-                foreach (var position in apiPositions.Positions) {
-                    filteredPositions[filteredPositionsIndex++] = position;
+        }
+        else {
+            if (vehicleInitializationDone) {
+                foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                    vehicleInfo.Filtered=false;
+                    if(!vehicleInfo.Hidden) {
+                        markerIdListToShow.Add(vehicleInfo.Layer.Id);
+                    } 
+                }
+                if (!hideVehicles) {
+                    Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
+                    StateHasChanged();
                 }
             }
+            else {
+                foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                    vehicleInfo.Filtered=false;
+                }
+            }
+        }
+        HideVehiclesFromNonSelectedLines();
+    }
+
+    private void HideVehiclesFromNonSelectedLines() {
+        HashSet<string> linesHidden = new HashSet<string>();
+        foreach (LineSelection selection in SelectedLines) {
+            if (selection.Display==false) {
+                linesHidden.Add(selection.LineId);
+            }
+        }
+
+        List<String> markerIdListToHide = new List<String>();
+        List<String> markerIdListToShow = new List<String>();
+        foreach(VehicleInfo vehicleInfo in vehiclesInfo) {
+            if (vehicleInfo.Assigned) {
+                if (linesHidden.Contains(vehicleInfo.Position.RealTime.Line.Id)){
+                    if(!vehicleInfo.Filtered) {
+                        markerIdListToHide.Add(vehicleInfo.Layer.Id);
+                    }
+                    vehicleInfo.Hidden=true;
+                }
+                else {
+                    if(vehicleInfo.Hidden) {
+                        markerIdListToShow.Add(vehicleInfo.Layer.Id);
+                    }
+                    vehicleInfo.Hidden=false;
+                }
+            }
+        }
+
+        if (!hideVehicles) {
+            Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
+            Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
+        }
+    }
+
+    private void HideVehiclesFromLine(string LineId, bool updateFlag) {
+        List<String> markerIdListToHide = new List<String>();
+        List<ApiPosition> filteredPositionsToRemove = new List<ApiPosition>();
+        foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+            if (vehicleInfo.Assigned) {
+                if (vehicleInfo.Position.RealTime.Line.Id == LineId) {
+                    markerIdListToHide.Add(vehicleInfo.Layer.Id);
+                    if (updateFlag) {
+                        vehicleInfo.Hidden=true;
+                    }  
+                }
+            }
+        }
+        if (!hideVehicles) {
+            Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
+        }
+    }
+
+    private void DisplayVehiclesFromLine(string LineId, bool updateFlag) {
+        List<String> markerIdListToShow = new List<String>();
+        List<ApiPosition> hiddenPositionsToRemove = new List<ApiPosition>();
+        foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+            if (vehicleInfo.Assigned) {
+                if (vehicleInfo.Position.RealTime.Line.Id == LineId) {
+                    if (!vehicleInfo.Filtered) {
+                        markerIdListToShow.Add(vehicleInfo.Layer.Id);  
+                    }
+                    if (updateFlag) {
+                        vehicleInfo.Hidden=false;
+                    } 
+                }
+            }
+        }
+        if (!hideVehicles) {
+            Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
+        }
+    }
+
+    private void HideNotAssignedVehicles() {
+        if (!hideVehicles) {
+            List<String> markerIdListToHide = new List<String>();
+            foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                if((!vehicleInfo.Assigned)&&(!vehicleInfo.Hidden)) {
+                    vehicleInfo.Hidden = true;
+                    markerIdListToHide.Add(vehicleInfo.Layer.Id);
+                }
+            }
+            Parent.map.SetMarkerOpacityIdList(markerIdListToHide.ToArray(), 0.0f);
+        }
+    }
+
+    private void DisplayNotAssignedVehicles() {
+        if (!hideVehicles) {
+            List<String> markerIdListToShow = new List<String>();
+            foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                if((!vehicleInfo.Assigned)&&(vehicleInfo.Hidden)) {
+                    vehicleInfo.Hidden = false;
+                    if (!vehicleInfo.Filtered) {
+                        markerIdListToShow.Add(vehicleInfo.Layer.Id);
+                    } 
+                }
+            }
+            Parent.map.SetMarkerOpacityIdList(markerIdListToShow.ToArray(), 1.0f);
         }
     }
 
@@ -1397,13 +1638,11 @@
         return input.Contains(vehicleFilteringString.ToLower());
     }
 
-    private void VehicleMouseEnterEvent(int layerIndex) {
-        Layer vehicleLayer = vehicleLayers[layerIndex];
+    private void VehicleMouseEnterEvent(Layer vehicleLayer) {
         Parent.map.OpenPopup(vehicleLayer);
     }
 
-    private void VehicleMouseLeaveEvent(int layerIndex) {
-        Layer vehicleLayer = vehicleLayers[layerIndex];
+    private void VehicleMouseLeaveEvent(Layer vehicleLayer) {
         Parent.map.ClosePopup(vehicleLayer);
     }
 
@@ -1423,8 +1662,8 @@
 
     private void HideAllVehicles() {
         List<String> markerIdList = new List<String>();
-        foreach (var layer in vehicleLayers) {
-            markerIdList.Add(layer.Id);
+        foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+            markerIdList.Add(vehicleInfo.Layer.Id);
         }
         Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 0.0f);
         hideVehicles = true;
@@ -1432,27 +1671,43 @@
 
     private void UnHideAllVehicles() {
         List<String> markerIdList = new List<String>();
-        foreach (var layer in vehicleLayers) {
-            markerIdList.Add(layer.Id);
+        foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+            if ((!vehicleInfo.Filtered)&&(!vehicleInfo.Hidden)) {
+                markerIdList.Add(vehicleInfo.Layer.Id);
+            }   
         }
         Parent.map.SetMarkerOpacityIdList(markerIdList.ToArray(), 1.0f);
         hideVehicles = false;
     }
 
     private void DisplayAllVehicles() {
-        int vehicleIndex = 0;
+        vehiclesInfo = new List<VehicleInfo>();
         foreach (var position in apiPositions.Positions) {
             string popupContent = CreateVehiclePopupContent(position);
+            string lineColor, foreColor;
+            bool assigned = true;
+            if ((position.RealTime != null) && (position.RealTime.Line != null) && !string.IsNullOrEmpty(position.RealTime.Line.Id)) {
+                Flowly.Api.Map.ApiLine line = linesDict[position.RealTime.Line.Id];
+                lineColor = line.Color;
+                foreColor = line.ForeColor;
+            }
+            else {
+                lineColor= "808080";
+                foreColor = "FFFFFF";
+                assigned = false;
+            }
             Marker vehicleMarker = new Marker((float)position.Latitude, (float)position.Longitude) {
-                    Icon = GetVehicleIcon(position.Icon, position.Load, position.State),
+                    Icon = GetVehicleIcon(position.Icon, lineColor, foreColor, position.Load, position.State),
                     Popup = new Popup {
                         Content = popupContent,
                         Offset = new System.Drawing.Point(14, 10),
                         ShowCloseButton = false
-                } //new Popup
+                    }, //new Popup
+                    ZIndexOffset=100
             }; // new Marker
             Parent.map.AddLayer(vehicleMarker);
-            vehicleLayers[vehicleIndex++] = vehicleMarker;
+            VehicleInfo vehicleInfo = new VehicleInfo(position, false, false, assigned, vehicleMarker);
+            vehiclesInfo.Add(vehicleInfo);
         } //foreach
         hideVehicles = false;
     }
@@ -1460,27 +1715,78 @@
     private void RemoveAllVehicles() {
         if(vehicleInitializationDone)
         {
-            foreach (Layer vehicleLayer in vehicleLayers) {
-                Parent.map.RemoveLayer(vehicleLayer);
+            foreach (VehicleInfo vehicleInfo in vehiclesInfo) {
+                Parent.map.RemoveLayer(vehicleInfo.Layer);
             } 
             hideVehicles = true;
-            Array.Clear(vehicleLayers);
         }
     }
 
     private string CreateVehiclePopupContent (ApiPosition position) {
-        string popupContent = $"<div style= \"min-width:150pt; font-size: 9pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:6pt; justify-content:center;" +
-                              $"text-align: center; margin:10pt 0pt; word-spacing: 3pt;\"> {GetStateIcon(position.State)}" +
+        string popupContent = $"<div style= \"min-width:150pt; font-size: 10pt; height: 20pt; background-color: #e4e4e4; border-radius: 5px; padding:5pt; justify-content:center;" +
+                              $"text-align: center; margin:10pt 0pt; line-height:11pt;\"> {GetStateIcon(position.State)}" +
                               $"<i style=\"color: black; font-size: 10pt;\" class=\"{position.Icon}\"></i>" +
-                              $"<span style= \"font-size: 9pt; padding: 0 10pt;\">{GetVehicleInfo(position.Vehicle, position.VehicleId)}</span>" +
-                              $"{GetPopupLoadIcon(GetLoadColor(position.Load))}</div>";
-
-        foreach (ApiDevice device in position.Devices) {
-            popupContent +=  $"<p style= \"font-size: 9pt; text-align: center; word-spacing: 3pt;\">" +
-                              $"{GetStateIcon(device.State)} {device.DeviceId}</p>";
+                              $"<span style= \"font-size: 10pt; padding: 0 10pt;\">{GetVehicleInfo(position.Vehicle, position.VehicleId)}</span>" +
+                              $"{GetPopupLoadIcon(GetLoadColor(position.Load))}</div>" +
+                              $"<div style= \"margin-bottom: 5px;\">";
+        if ((position.RealTime != null) && (position.RealTime.Line != null) && !string.IsNullOrEmpty(position.RealTime.Line.Id)) {
+            Flowly.Api.Map.ApiLine line = linesDict[position.RealTime.Line.Id];
+            popupContent += $"<div style=\"text-align: center; margin-bottom: 5px; margin-left: 8px;\"><span class=\"badge\" style=\"{LineIconFormatForVehiclePopup(line.ForeColor, line.Color, 50, 20)}\">" +
+                            $"{RemoveLineFromString(line.Id)}</span>" +
+                            $"<span class=\"badge\" style=\"{LineIconFormatForVehiclePopup("000000", "DCDCDC", 50, 20)}\">" +
+                            $"{GetDirectionString(position.RealTime.Direction)}</span>" +
+                            $"<span class=\"badge\" style=\"{LineIconFormatForVehiclePopup("FFFFFF", GetDelayColor(position.RealTime.Delay), 50, 20)}\">" +
+                            $"{GetDelayString(position.RealTime.Delay)}</button></span>";
+            if ((position.RealTime.Station != null) && !string.IsNullOrEmpty(position.RealTime.Station.Id)) {
+                popupContent += $"<div style=\"text-align: center; font-size: 10pt; line-height:15pt; font-weight: bold; margin-bottom: 5px;\">{stationsDict[position.RealTime.Station.Id].Name}</div>";
+            }  
         }
+        foreach (ApiDevice device in position.Devices) {
+            popupContent +=  $"<div style= \"font-size: 9pt; text-align: center; word-spacing: 3pt;\">" +
+                              $"{GetStateIcon(device.State)} {device.DeviceId}</div>";
+        }
+        popupContent +="</div>";
 
         return popupContent; 
+    }
+
+    private string GetDirectionString(int direction) {
+        switch (direction) {
+            case 0:
+                return GetLocalizedString("Aller");
+            case 1:
+                return GetLocalizedString("Retour");
+            default:
+                return GetLocalizedString("Direction Inconnue");
+        }
+    }
+
+    private string GetDelayColor(int delay) {
+        switch (delay) {
+            case 1:
+                return "008000";
+            case 2:
+                return "FF0000";
+            case 3:
+                return "FF8C00";
+            case 0:
+            default:
+                return GetLocalizedString("Retard Inconnu");
+        }  
+    }
+
+    private string GetDelayString(int delay) {
+        switch (delay) {
+            case 1:
+                return GetLocalizedString("A l'heure");
+            case 2:
+                return GetLocalizedString("En avance");
+            case 3:
+                return GetLocalizedString("En retard");
+            case 0:
+            default:
+                return GetLocalizedString("Retard Inconnu");
+        }
     }
 
     private string GetVehicleInfo(string matriculation, int? stock_number) {
@@ -1501,18 +1807,22 @@
     }
 
     private string GetPopupLoadIcon(string color) {
-        return $"<i style=\"color: {color}; font-size: 10pt; padding-right:3px;\" class=\"fas fa-users\"></i>";
+        string style = $"color: {color}; font-size: 10pt; padding-right:3px;";
+        if (color=="grey") {
+            style += " opacity:0.75;";
+        }
+        return $"<i style=\"{style}\" class=\"fas fa-users\"></i>";
     }
 
     private string GetPopupRealTimeIcon(bool realTime) {
-        string color;
+        string style;
         if(realTime) {
-            color = "green";
+            style = "color: green; font-size: 9pt;";
         }
         else {
-            color = "grey";
+            style = "color: grey; font-size: 9pt; opacity:0.75;";
         }
-        return $"<i  style=\"color: {color}; font-size: 9pt;\" class=\"fas fa-wifi\"></i>";
+        return $"<i  style=\"{style}\" class=\"fas fa-wifi\"></i>";
     }
 
     private DateTime UnixTimeStampStringToDateTime(string timeStampString) {
@@ -1524,7 +1834,9 @@
     }
 
     private string FormatPassingTime(string timeStampString) {
-        DateTime passingTime = UnixTimeStampStringToDateTime(timeStampString);
+
+        TimeZoneInfo conversion = TimeZoneConverter.TZConvert.GetTimeZoneInfo(apiMap.Location);
+        DateTime passingTime = TimeZoneInfo.ConvertTime(UnixTimeStampStringToDateTime(timeStampString), conversion);
         return passingTime.ToString("t");
     }
 

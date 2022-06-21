@@ -4,7 +4,7 @@
 @inject IJSRuntime jSRuntime
 @inject NavigationManager Nav
 <div class="col-md-3">
-    <select class="form-control" @bind="Culture">
+    <select class="form-control" style="width:fit-content; margin-right: 5vw;" @bind="Culture">
         @foreach (var language in supportedLanguages)
         {
             <option value="@language">@language.DisplayName</option>

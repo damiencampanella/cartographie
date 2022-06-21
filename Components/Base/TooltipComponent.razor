@@ -1,8 +1,9 @@
 ﻿@namespace BlazorFlowly.Components
 
-<AntDesign.Tooltip OverlayStyle="pointer-events:none;" MouseLeaveDelay="0" MouseEnterDelay="0" Placement=@Placement Title="@Title">
+<div style="width:fit-content; height: fit-content; display: inline-block; vertical-align: middle;" data-toggle="tooltip" 
+     data-html="true" data-placement=@Placement data-boundary="window" title=@Title>
     @ChildContent
-</AntDesign.Tooltip>
+</div>
 
 @code {
     [Parameter]
@@ -10,5 +11,5 @@
     [Parameter]
     public string Title { get; set; }
     [Parameter]
-    public Placement Placement { get; set; }
+    public string Placement { get; set; } = "bottom";
 }

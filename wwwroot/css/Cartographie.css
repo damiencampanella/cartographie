@@ -2,6 +2,17 @@
 /* stylelint-disable no-duplicate-selectors */
 /* stylelint-disable */
 /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors,string-no-newline */
+div.helper_main_div_style {
+    width: 79vw;
+    max-height: 85vh;
+    overflow-y: scroll;
+}
+
+div.popover {
+    max-width:fit-content;
+    width:fit-content;
+}
+
 p.helper_heading1 {
     font-size: 14px;
     font-weight: bold;
@@ -16,13 +27,92 @@ p.helper_line {
     padding-left: 40pt;
 }
 
-button.carto_bottom_button {
-    display: block;
-    position: absolute;
-    bottom: 5pt;
-    transform: translateX(-50%);
-    left: 50%;
+p.helper_line_with_paddingtop {
+    padding-left: 40pt;
+    padding-top: 10pt;
+}
+
+i.helper_icon {
+    font-size: 10pt;
+}
+
+span.helper_padding {
+    padding-right: 3pt;
+}
+
+i.black_icon {
+    color: black;
+}
+
+i.grey_icon {
+    color: grey;
+}
+
+i.green_icon {
+    color: green;
+}
+
+i.orange_icon {
+    color: orange;
+}
+
+i.red_icon {
+    color: red;
+}
+
+i.helper_circle {
+    padding-left: 1pt;
+    font-size: 4pt;
+    position: relative;
+    left: -1pt;
+    bottom: 4pt;
+}
+
+span.direction_button_helper {
+    color: #000000;
+    background: #DCDCDC;
+    min-width: 50px;
+    min-height: 18px;
+    border-radius: 4px;
+    font-size: 90%;
+    padding: 0.5rem;
+}
+
+span.delay_button_helper {
+    color: #FFFFFF;
+    background: #FF8C00;
+    min-width: 50px;
+    min-height: 18px;
+    border-radius: 4px;
+    font-size: 90%;
+    padding: 0.5rem;
+}
+
+button.rounded_border {
     border-radius: 5px;
+}
+
+div.carto_header {
+    flex: 0 0 auto;
+    transition: all 0.2s;
+    display: block;
+}
+
+
+div.carto_sider {
+    transition: all 0.2s;
+    display: block;
+    padding-bottom: 0;
+    height: 100%;
+}
+
+button.carto_bottom_button {
+    position: sticky;
+    border-radius: 5px;
+    width: max-content;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    line-height: 10pt;
 }
 
 span.carto_button_text {
@@ -33,10 +123,40 @@ span.carto_button_text {
 span.carto_button_icon {
     float: left;
     padding-top: 3pt;
+    font-size: 10px;
+}
+
+span.carto_tab {
+    font-size: 12pt;
+    word-spacing: 2pt;
+}
+
+button.btn {
+    padding: 0.5rem;
+    border: 1px solid #d9d9d9;
+}
+
+a.nav-link {
+    padding: 0.5rem;
+}
+
+i.tab_icon {
+    padding-right: 4px;
+}
+
+span.horizontal_divider {
+    display: flex;
+    clear: both;
+    width: 100%;
+    min-width: 100%;
+    padding: 0;
+    color: rgba(0,0,0,.85);
+    line-height: 1.5715;
+    border-top: 1px solid rgba(0,0,0,.06);
 }
 
 ul.station-list {
-    margin: 5px;
+    margin: 7pt;
     padding: 0;
 }
 
@@ -45,7 +165,7 @@ li.station-list-item {
     position: relative;
     top: 0;
     bottom: 0;
-    margin: 0 0 0 0;
+    margin: 0;
 }
 
 li.station-list-item:enabled {
@@ -62,19 +182,3 @@ li.station-list-item:hover {
     font-weight: bold;
 }
 
-div.ant-tabs-nav {
-    padding: 0 10pt;
-}
-
-div.ant-tabs-nav-operations {
-    display: none !important;
-}
-
-div .ant-tabs-tab + .ant-tabs-tab {
-    margin: 0 0 0 10px;
-}
-
-footer .ant-pro-global-footer {
-    margin: 0 0 0 0;
-    display: none !important;
-}

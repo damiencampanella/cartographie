@@ -2,149 +2,70 @@
 
 @inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
 
-@using BlazorLeaflet.Models;
-@using System.Globalization
-@using System.Timers
 @inject IJSRuntime jsRuntime
 @inject IMapDataService MapDataService
 @inject IPositionsDataService PositionsDataService
 @inject IStopTimesDataService StopTimesDataService
 
 @if(DisplayMenu) {
-    <div style="width:100%; height:5%">
-        <HelperComponent @ref=helperComponent> 
-            <Content>
-                <div style="width: 65vw;max-height: 85vh; overflow-y:scroll">
-                    <p class="helper_heading1">@GetLocalizedString("Partie carte"):</p>
-                    <p class="helper_heading2">@GetLocalizedString("Cliquez sur un véhicule pour afficher les informations correspondantes"):</p>
-                    <p style="padding-top: 10pt;" class="helper_line"><i style="padding-left: 1pt; color: grey; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
-                        <i style="color: black; font-size: 10pt;" class="fas fa-bus"></i><span style="padding-right: 3pt">: @GetLocalizedString("statut du véhicule inconnu") - </span>
-                        <i style="padding-left: 1pt; color: green; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
-                        <i style="color: black; font-size: 10pt;" class="fas fa-bus"></i><span style="padding-right: 3pt"> : @GetLocalizedString("statut OK") - </span>
-                        <i style="padding-left: 1pt; color: orange; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
-                        <i style="color: black; font-size: 10pt;" class="fas fa-bus"></i><span style="padding-right: 3pt"> : @GetLocalizedString("pas de signal reçu depuis 5min") - </span>
-                        <i style="padding-left: 1pt; color: red; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
-                        <i style="color: black; font-size: 10pt;" class="fas fa-bus"></i>: @GetLocalizedString("pas de signal reçu depuis plus de 10min")</p>
-                    <p class="helper_line"><i style="color: grey; font-size: 10pt;" class="fas fa-users"></i>: @GetLocalizedString("pas de prédiction de charge") - 
-                        <i style="color: green; font-size: 10pt;" class="fas fa-users"></i><span style="padding-right: 3pt">: @GetLocalizedString("charge légère") - </span>
-                        <i style="color: orange; font-size: 10pt;" class="fas fa-users"></i><span style="padding-right: 3pt">: @GetLocalizedString("charge modérée") - </span> 
-                        <i style="color: red; font-size: 10pt;" class="fas fa-users"></i>: @GetLocalizedString("charge importante")</p>
-                        <p class="helper_line"><i style="padding-left: 1pt; color: grey; font-size: 4pt; position:relative; left: -1pt; bottom: 4pt;" class="fas fa-circle"></i>
-                            <span>@GetLocalizedString("[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)")</span></p>
-                    <br/>
-                    <p class="helper_heading2">@GetLocalizedString("Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée")</p>
-                    <p style="padding-top: 10pt;"  class="helper_line">@GetLocalizedString("Les prochains horaires de passage des correspondances sont aussi affichés")</p>
-                    <p class="helper_line"><i style="color: grey; font-size: 10pt;" class="fas fa-users"></i>
-                        <span>: @GetLocalizedString("charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)")</span></p>
-                    <p class="helper_line"><i style="color: grey; font-size: 10pt;" class="fas fa-broadcast-tower"></i>
-                        <span style="padding-right: 3pt">: @GetLocalizedString("l'horaire de passage donné est théorique") - </span>
-                        <i style="color: green; font-size: 10pt;" class="fas fa-broadcast-tower"></i>
-                        <span>: @GetLocalizedString("l'horaire de passage est calculé en temps réel")</span></p>
-                    <br/>
-                    <p class="helper_heading1">@GetLocalizedString("Partie menu"):</p>
-                    <p class="helper_heading2">@GetLocalizedString("L'onglet \"Lignes\" vous permet de sélectionner les lignes qui vous intéressent:")</p>
-                    <p style="padding-top: 10pt;" class="helper_line">@GetLocalizedString("Amenez la souris au-dessus d'une ligne pour masquer les autres lignes")</p>
-                    <p  class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;">
-                            <ChildContent>
-                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                <span class="carto_button_text">@GetLocalizedString("Lignes Masquées")</span>
-                            </ChildContent>
-                        </Button>
-                        @GetLocalizedString("Ce bouton permet de griser les autres lignes au lieu de les masquer")</p>
-                    <p class="helper_line">@GetLocalizedString("Cliquez sur une ligne pour la désélectionner")</p>
-                    <p class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small">
-                            <ChildContent>
-                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                            </ChildContent>
-                        </Button>
-                        @GetLocalizedString("Ce bouton permet de désélectionner toutes les lignes de la catégorie correspondante")</p>
-                    <br/>
-                    <p class="helper_heading2">@GetLocalizedString("L'onglet \"Sélection\" vous permet choisir la direction et la variante sélectionnée pour chaque ligne")</p>
-                    <p style="padding-top: 10pt;" class="helper_line">@GetLocalizedString("Cliquez sur une des lignes pour obtenir la liste des variantes et la liste des stations de la variante sélectionnée")</p>
-                    <p class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small">
-                            <ChildContent>
-                                <AntDesign.Icon Type="arrow-right" Theme="outline"/>
-                            </ChildContent>
-                        </Button> 
-                        @GetLocalizedString("Ce bouton permet de changer de direction")</p>
-                    <p class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;" Size="Small">
-                            <ChildContent>
-                                <AntDesign.Icon Type="close" Theme="outline"/>
-                            </ChildContent>
-                        </Button> 
-                        @GetLocalizedString("Ce bouton permet de désélectionner la ligne")</p>
-                    <p class="helper_line">@GetLocalizedString("Cliquez sur la variante voulue pour la sélectionner")</p>
-                    <p class="helper_line">@GetLocalizedString("Amenez la souris au-dessus d'une des stations de la liste pour afficher les informations correspondantes")</p>
-                    <p class="helper_line">@GetLocalizedString("A droite de chaque station sont affichées les correspondances possibles")</p>
-                    <p class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;">
-                            <ChildContent>
-                                <AntDesign.Icon Class="carto_button_icon" Type="close" Theme="outline"/>
-                                <span class="carto_button_text">@GetLocalizedString("Supprimer toutes les lignes sélectionnées")</span>
-                            </ChildContent>
-                        </Button> 
-                        @GetLocalizedString("Ce bouton permet de désélectionner toutes les lignes")</p>
-                    <br/>
-                    <p class="helper_heading2">@GetLocalizedString("L'onglet \"Véhicules\" vous permet d'afficher la liste des véhicules ayant un capteur")</p>
-                    <p style="padding-top: 10pt;" class="helper_line">@GetLocalizedString("Utilisez le champ correspondant pour rechercher parmi les véhicules.")</p>
-                    <p class="helper_line">@GetLocalizedString("La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur")</p>
-                    <p class="helper_line">@GetLocalizedString("Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes")</p>
-                    <p class="helper_line">@GetLocalizedString("Cliquez sur un véhicule pour zoomer dessus")</p>
-                    <p class="helper_line">
-                        <Button Type="@ButtonType.Primary" Ghost Style="border-radius: 5px;">
-                            <ChildContent>
-                                <AntDesign.Icon Class="carto_button_icon" Type="eye-invisible" Theme="outline"/>
-                                <span class="carto_button_text">@GetLocalizedString("Masquer les véhicules")</span>
-                            </ChildContent>
-                        </Button> 
-                        @GetLocalizedString("Ce bouton permet de masquer tous les véhicules")</p>
-                </div>
-            </Content>   
+    string divStyle = " min-height: 100%; height: 100%;";
+    if(!isMobileView)
+    {
+        divStyle += "display: flex; flex-direction: row;";
+    }
+    @*<div style="width:100%; height:5%; padding-left: 10px; padding-top: 2px;">
+
+    @if(isMobileView) {
+        <HelperComponent Content=@helperContent AdditionalButtonStyle="padding: 0;">   
         </HelperComponent>
-        <DateInputComponent Style="position: absolute; top: 0; right: 0; width:20vw;" SetInput="SetDateInput"></DateInputComponent>
-    </div>
-    <AntDesign.Layout Style="min-height: 95%; height: 95%;">
+        <DateInputComponent Style="width:0; height: 4vh;" SetInput="SetDateInput" StartDate=DateTime.Today></DateInputComponent>
+    } 
+    else{
+        divStyle += "display: flex; flex-direction: row;";
+        <HelperComponent Content=@helperContent>   
+        </HelperComponent>
+        <DateInputComponent Style="width:15vw; height: 4vh;" SetInput="SetDateInput" StartDate=DateTime.Today></DateInputComponent>
+    }
+    </div>*@
+    <div Style=@divStyle>
         @if (initializationDone) {
             @if(isMobileView) {
-                <Header Style="background: white; width: 100%; height: 45%; padding: 0 0px">
+                <header class="carto_header" style="background: white; width: 100%; height: 50%; padding: 0 0px">
                     <CartographieMenuContent @ref=menuContent Parent=this CollapsedSider=collapsedSider DisplayVehicles=@DisplayVehicles DisplayMenu=@DisplayMenu DisplayOneLine=@DisplayOneLine 
                                                               LineToDisplay=@LineToDisplay DirectionToDisplay=@DirectionToDisplay VariantToDisplay=@VariantToDisplay></CartographieMenuContent>
-                </Header>
+                </header>
             }
             else {
-                <Sider Style="padding-bottom: 0px;" Collapsible NoTrigger Collapsed=@collapsedSider Theme="SiderTheme.Light" Width=@menuWidth CollapsedWidth=@(lineButtonWidth+15)>
+                if (collapsedSider) {
+                    divStyle = $"flex: 0 0 {lineButtonWidth*5/4+15}px; max-width: {lineButtonWidth*5/4+15}px; min-width: {lineButtonWidth*5/4+15}px; width: {lineButtonWidth*5/4+15}px;";         
+                }
+                else {
+                    divStyle = $"flex: 0 0 {menuWidth}px; max-width: {menuWidth}px; min-width: {menuWidth}px; width: {menuWidth}px;"; ;
+                }
+                <div class="carto_sider" style=@divStyle>
                     <CartographieMenuContent @ref=menuContent Parent=this CollapsedSider=collapsedSider DisplayVehicles=@DisplayVehicles DisplayMenu=@DisplayMenu DisplayOneLine=@DisplayOneLine 
                                                               LineToDisplay=@LineToDisplay DirectionToDisplay=@DirectionToDisplay VariantToDisplay=@VariantToDisplay></CartographieMenuContent>
-                </Sider>
+                </div>
             }
         }
-        <Content>
-            <div style="height: 100%; width: 100%;">
+        <div style="height: 100%; width: 100%; flex:auto;">
                 @if(initializationDone){
                     @if(!isMobileView) {
                         @if(collapsedSider){
-                            string collapseButtonStyle = $"font-size: 20px; cursor: pointer; position: absolute; z-index:3; left: {lineButtonWidth-10}px;" +
-                                                         $"top: 6.5%; background-color:white; border:thin";
-                            <AntDesign.Icon Style=@collapseButtonStyle
-                                            Type="menu-unfold" Theme="outline" OnClick="ToggleCollapseSider"/>
+                            string collapseButtonStyle = $"font-size: 20px; cursor: pointer; position: absolute; z-index:3; left: {lineButtonWidth*5/4-6}px;" +
+                                                         $"color: darkgrey; background-color:white; padding: 0 1pt; border: none;";
+                            <button id="collapse_button" style=@collapseButtonStyle @onclick=ToggleCollapseSider><i class="fas fa-angle-double-right"></i></button>
                         }
                         else{
-                            string collapseButtonStyle = $"font-size: 20px; cursor: pointer; position: absolute; z-index:3; left: {menuWidth-30}px;" +
-                                                         $"top: 6.5%; background-color:white; border:thin";
-                            <AntDesign.Icon Style=@collapseButtonStyle
-                                            Type="menu-fold" Theme="outline" OnClick="ToggleCollapseSider"/>
+                            string collapseButtonStyle = $"font-size: 20px; cursor: pointer; position: absolute; z-index:3; left: {menuWidth-25}px;" +
+                                                         $"color: darkgrey; background-color:white; padding: 0 1pt; border: none;";
+                            <button id="collapse_button" style=@collapseButtonStyle @onclick=ToggleCollapseSider><i class="fas fa-angle-double-left"></i></button>
                         }
                     }
                 }
                 <LeafletMap Map="map" />
-            </div>
-        </Content>
-    
-    </AntDesign.Layout>
+        </div>
+    </div>
 }
 else {
     @if (initializationDone) {
@@ -155,8 +76,6 @@ else {
         <LeafletMap Map="map" />
     </div>
 }
-
-
 
 @code {
     [Parameter]
@@ -180,15 +99,15 @@ else {
     public DateTime DateInput { get; set; } = DateTime.Now;
 
     public bool isMobileView = false;
-    public int lineButtonWidth =  100;
+    public int lineButtonWidth =  80;
     public bool collapsedSider = false;
     public string lineSelectionWordSpacing = "2";
     public Map map;
     public int menuWidth = 400;
+    private string helperContent = "";
 
     private bool initializationDone = false;
     private CartographieMenuContent menuContent;
-    private HelperComponent helperComponent;
     public int WindowHeight { get; set; }
     public int WindowWidth { get; set; }
 
@@ -216,11 +135,6 @@ else {
                 lineButtonWidth = (menuWidth/3)-35;
                 lineSelectionWordSpacing = "-2";
             }
-            else if (WindowWidth < 1500) {
-                menuWidth = 325;
-                lineButtonWidth = 85;
-                lineSelectionWordSpacing = "-2";
-            }
 
             initializationDone = true;
         }
@@ -228,6 +142,94 @@ else {
             Console.WriteLine("Exception trying to get the window dimensions, Message: " + ex.Message);
             Console.WriteLine("Default configuration is used.");
         }
+               
+            helperContent = "<div class=\"helper_main_div_style\">" +         
+            $"<p class=\"helper_heading1\">{@GetLocalizedString("Partie carte")}:</p>" +
+            $"<p class=\"helper_heading2\">{@GetLocalizedString("Cliquez sur un véhicule pour afficher les informations correspondantes")}:</p>" +
+            $"<p class=\"helper_line_with_paddingtop\"><i class=\"fas fa-circle helper_circle grey_icon\"></i>" +
+            $"<i class=\"fas fa-bus helper_icon black_icon\"></i><span class=\"helper_padding\">: {@GetLocalizedString("statut du véhicule inconnu")} - </span>" +
+            $"<i class=\"fas fa-circle helper_circle green_icon\"></i>" +
+            $"<i class=\"fas fa-bus helper_icon black_icon\"></i><span class=\"helper_padding\"> : {@GetLocalizedString("statut OK")} - </span>" +
+            $"<i class=\"fas fa-circle helper_circle orange_icon\"></i>" +
+            $"<i class=\"fas fa-bus helper_icon black_icon\"></i><span class=\"helper_padding\"> : {@GetLocalizedString("pas de signal reçu depuis 5min")} - </span>" +
+            $"<i class=\"fas fa-circle helper_circle red_icon\"></i>" +
+            $"<i class=\"fas fa-bus helper_icon black_icon\"></i>: {@GetLocalizedString("pas de signal reçu depuis plus de 10min")}</p>" +
+            $"<p class=\"helper_line\"><i class=\"fas fa-users helper_icon grey_icon\"></i>: {@GetLocalizedString("pas de prédiction de charge")} - " +
+            $"<i class=\"fas fa-users helper_icon green_icon\"></i><span class=\"helper_padding\">: {@GetLocalizedString("charge légère")} - </span>" +
+            $"<i class=\"fas fa-users helper_icon orange_icon\"></i><span class=\"helper_padding\">: {@GetLocalizedString("charge modérée")} - </span>" +
+            $"<i class=\"fas fa-users helper_icon red_icon\"></i>: {@GetLocalizedString("charge importante")}</p>"+
+            $"<p class=\"helper_line\">{@GetLocalizedString("Le premier bouton indique la ligne du véhicule")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"<span type=\"button\" class=\"direction_button_helper\">" + 
+            $"{@GetLocalizedString("Aller")}</span> " +
+            $"<span>{@GetLocalizedString("Le second indique sa direction")}</span></p>" +
+            $"<p class=\"helper_line\">" +
+            $"<span type=\"button\" class=\"delay_button_helper\">" +
+            $"{@GetLocalizedString("En retard")}</span> " +
+            $"<span>{@GetLocalizedString("Le troisième indique son retard")}</span></p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("La ligne en gras affiche la prochaine station du véhicule")}</p>" +
+            $"<p class=\"helper_line\"><i class=\"fas fa-circle helper_circle grey_icon\"></i>" +
+            $"<span>{@GetLocalizedString("[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)")}</span></p>" +
+            $"<br/>" +
+            $"<p class=\"helper_heading2\">{@GetLocalizedString("Cliquez sur une station pour afficher les horaires des trois prochains passages dans la direction sélectionnée")}</p>" +
+            $"<p class=\"helper_line_with_paddingtop\">{@GetLocalizedString("Les prochains horaires de passage des correspondances sont aussi affichés")}</p>" +
+            $"<p class=\"helper_line\"><i class=\"fas fa-users helper_icon grey_icon\"></i>" +
+            $"<span>: {@GetLocalizedString("charge estimée à cet horaire (voir ci-dessus pour la signification des couleurs de charge)")}</span></p>" +
+            $"<p class=\"helper_line\"><i class=\"fas fa-broadcast-tower helper_icon grey_icon\"></i>" +
+            $"<span class=\"helper_padding\">:" + @GetLocalizedString("l'horaire de passage donné est théorique") + " - </span>" +
+            $"<i class=\"fas fa-broadcast-tower helper_icon green_icon\"></i>" +
+            $"<span>:"+ @GetLocalizedString("l\'horaire de passage est calculé en temps réel") + "</span></p>" +
+            $"<br/>" +
+            $"<p class=\"helper_heading1\">{@GetLocalizedString("Partie menu")}:</p>" +
+            $"<p class=\"helper_heading2\">"+ @GetLocalizedString("L\'onglet \"Lignes\" vous permet de sélectionner les lignes qui vous intéressent") +"</p>" +
+            $"<p class=\"helper_line_with_paddingtop\">"+ @GetLocalizedString("Amenez la souris au-dessus d\'une ligne pour masquer les autres lignes") +"</p>" +
+            $"<p  class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary rounded_border rounded_border\">" +
+            $"            <i class=\"fas fa-eye-slash carto_button_icon\"></i>" +
+            $"            <span class=\"carto_button_text\">{@GetLocalizedString("Lignes Masquées")}</span>" +
+            $"    </span>" +
+            $"    {@GetLocalizedString("Ce bouton permet de griser les autres lignes au lieu de les masquer")}</p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("Cliquez sur une ligne pour la désélectionner")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary btn-sm rounded_border\">" +
+            $"            <i class=\"fas fa-eye-slash carto_button_icon\"></i>" +
+            $"    </span>" +
+            $"    {@GetLocalizedString("Ce bouton permet de désélectionner toutes les lignes de la catégorie correspondante")}</p>" +
+            $"<br/>" +
+            $"<p class=\"helper_heading2\">"+ @GetLocalizedString("L\'onglet \"Sélection\" vous permet choisir la direction et la variante sélectionnée pour chaque ligne") +"</p>" +
+            $"<p class=\"helper_line_with_paddingtop\">{@GetLocalizedString("Cliquez sur une des lignes pour obtenir la liste des variantes et la liste des stations de la variante sélectionnée")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary btn-sm rounded_border\">" +
+            $"            <i class=\"fas fa-arrow-right\"></i>" +
+            $"    </span> " +
+            $"    {@GetLocalizedString("Ce bouton permet de changer de direction")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary btn-sm rounded_border\">" +
+            $"            <i class=\"fas fa-times carto_button_icon\"></i>" +
+            $"    </span> " +
+            $"    {@GetLocalizedString("Ce bouton permet de désélectionner la ligne")}</p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("Cliquez sur la variante voulue pour la sélectionner")}</p>" +
+            $"<p class=\"helper_line\">"+ @GetLocalizedString("Amenez la souris au-dessus d\'une des stations de la liste pour afficher les informations correspondantes") +"</p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("A droite de chaque station sont affichées les correspondances possibles")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary rounded_border\">" +
+            $"            <i class=\"fas fa-times carto_button_icon\"></i>" +
+            $"            <span class=\"carto_button_text\">{@GetLocalizedString("Supprimer toutes les lignes sélectionnées")}</span>" +
+            $"    </span> " +
+            $"    {@GetLocalizedString("Ce bouton permet de désélectionner toutes les lignes")}</p>" +
+            $"<br/>" +
+            $"<p class=\"helper_heading2\">"+ @GetLocalizedString("L\'onglet \"Véhicules\" vous permet d\'afficher la liste des véhicules ayant un capteur") + "</p>" +
+            $"<p class=\"helper_line_with_paddingtop\">{@GetLocalizedString("Utilisez le champ correspondant pour rechercher parmi les véhicules")}</p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur")}</p>" +
+            $"<p class=\"helper_line\">"+ @GetLocalizedString("Amenez la souris au-dessus d\'un des véhicules de la liste pour afficher les informations correspondantes") +"</p>" +
+            $"<p class=\"helper_line\">{@GetLocalizedString("Cliquez sur un véhicule pour zoomer dessus")}</p>" +
+            $"<p class=\"helper_line\">" +
+            $"    <span type=\"button\" class=\"btn btn-outline-primary rounded_border\">" +
+            $"            <i class=\"fas fa-eye-slash carto_button_icon\"></i>" +
+            $"            <span class=\"carto_button_text\">{@GetLocalizedString("Masquer les véhicules")}</span>" +
+            $"    </span> " +
+            $"    {@GetLocalizedString("Ce bouton permet de masquer tous les véhicules")}</p>" +
+            "</div>"; 
     }
 
     protected override void OnInitialized() {

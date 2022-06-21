@@ -2,22 +2,28 @@
 
 @inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
 
-<Popover ContentTemplate=Content Trigger="@(new AntDesign.Trigger[] { AntDesign.Trigger.Click})">
-    <Button Style="width: 65vw; background: #3EB1B8; border-radius: 2px;">
-        <Icon Type="info-circle" Style="color: white;" Theme="outline"/>
-        <span style="font-weight:bold; color: white;"> @GetLocalizedString("Aide en ligne")</span>
-    </Button>
-</Popover>
+@{
+    string style = "width: 79vw; height: 4vh; color: #3EB1B8; background: white; border-color: #3EB1B8; border-radius: 2px;" + AdditionalButtonStyle;
+    <a class="btn" role="button" style=@style
+            data-toggle="popover" data-placement="bottom" data-html="true" data-content=@Content>
+        <i class="fas fa-info-circle"></i>
+        <span style="font-weight:bold;"> @GetLocalizedString("Aide en ligne")</span>
+    </a>
+}
+
+
 
 
 @code {
     [Parameter]
-    public RenderFragment Content { get; set; }
+    public string Content { get; set; }
+
+    [Parameter]
+    public string AdditionalButtonStyle { get; set; }
 
     private string GetLocalizedString(string input)
     {
         return (string)Localize[input];
     }
-
 }
 

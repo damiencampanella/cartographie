@@ -1,0 +1,28 @@
+﻿@namespace BlazorFlowly
+@inherits LayoutComponentBase
+
+@inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
+
+<div class="container-fluid">
+    @*<nav id="navbar-main" class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" role="navigation">
+        <a class="navbar-brand" href="/Portal/Example.aspx"><asp:Label ID="PageTitle" runat="server" /></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="nav navbar-nav mr-auto">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="" id="nDMLk1">@Localize["Cartographie"]</NavLink>
+                </li>
+                <li style="position: absolute; right: -50pt;">
+                    <LanguageSelector />
+                </li>
+            </ul>
+        </div>
+    </nav>*@
+</div>
+
+<div>
+    @Body
+</div>
+

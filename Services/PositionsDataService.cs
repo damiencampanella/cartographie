@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Flowly.Api.Positions;
 using BlazorFlowly.Models;
+using Utf8Json;
 
 namespace BlazorFlowly.Services
 {
@@ -45,7 +46,15 @@ namespace BlazorFlowly.Services
                 string contentString = await content.ReadAsStringAsync();
 
                 try {
-                    results = Utf8Json.JsonSerializer.Deserialize<ApiPositions>(contentString);
+                    results = JsonSerializer.Deserialize<ApiPositions>(contentString);
+
+                    // Serialization test
+                    //JsonWriter writer = new JsonWriter();
+                    //JsonSerializer.Serialize<ApiPositions>(ref writer, results, ApiPositionsResolver.Instance);
+                    //JsonReader reader2 = new JsonReader(writer.ToUtf8ByteArray());
+                    //ApiPositions positions = JsonSerializer.Deserialize<ApiPositions>(ref reader2, ApiPositionsResolver.Instance);
+
+                    // Other deserializers
                     //results = System.Text.Json.JsonSerializer.Deserialize<ApiPositions>(contentString);
                     //results = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiPositions>(contentString); // comparable
                 }

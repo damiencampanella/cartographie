@@ -120,6 +120,9 @@
   <data name="A droite de chaque station sont affichées les correspondances possibles" xml:space="preserve">
     <value>On the right to the station is displayed the possible connections</value>
   </data>
+  <data name="A l'heure" xml:space="preserve">
+    <value>On Time</value>
+  </data>
   <data name="Accès à la position des véhicules impossible" xml:space="preserve">
     <value>Access to the vehicle positions failed</value>
   </data>
@@ -129,11 +132,17 @@
   <data name="Afficher les véhicules" xml:space="preserve">
     <value>Display the vehicles</value>
   </data>
+  <data name="Afficher toutes les lignes" xml:space="preserve">
+    <value>Display all the lines</value>
+  </data>
   <data name="Aide en ligne" xml:space="preserve">
     <value>Online Help</value>
   </data>
+  <data name="Aller" xml:space="preserve">
+    <value>Way In</value>
+  </data>
   <data name="Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes" xml:space="preserve">
-    <value>hover the mouse over one of the vehicles of the list to display the corresponding information</value>
+    <value>Hover the mouse over one of the vehicles of the list to display the corresponding information</value>
   </data>
   <data name="Amenez la souris au-dessus d'une des stations de la liste pour afficher les informations correspondantes" xml:space="preserve">
     <value>Hover the mouse over one of the stations of the list to display the corresponding information</value>
@@ -210,8 +219,17 @@
   <data name="Courses" xml:space="preserve">
     <value>Courses</value>
   </data>
-  <data name="Date au format" xml:space="preserve">
-    <value>Date with format</value>
+  <data name="Date au format &lt;b&gt;JJ/MM/AAAA&lt;/b&gt;" xml:space="preserve">
+    <value>Date with format &lt;b&gt;DD/MM/YYYY&lt;/b&gt;</value>
+  </data>
+  <data name="Direction Inconnue" xml:space="preserve">
+    <value>Unknown Direction</value>
+  </data>
+  <data name="En avance" xml:space="preserve">
+    <value>Early</value>
+  </data>
+  <data name="En retard" xml:space="preserve">
+    <value>Late</value>
   </data>
   <data name="Enlever la sélection" xml:space="preserve">
     <value>Remove from selected lines</value>
@@ -219,16 +237,13 @@
   <data name="Gestion du compte" xml:space="preserve">
     <value>Account center</value>
   </data>
-  <data name="JJ/MM/AAAA" xml:space="preserve">
-    <value>DD/MM/YYYY</value>
-  </data>
   <data name="l'horaire de passage donné est théorique" xml:space="preserve">
     <value>the stop time is theoretical</value>
   </data>
   <data name="l'horaire de passage est calculé en temps réel" xml:space="preserve">
     <value>the stop time is computed in real time</value>
   </data>
-  <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent:" xml:space="preserve">
+  <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent" xml:space="preserve">
     <value>The "Lines" tab is used to select the lines your are interested in</value>
   </data>
   <data name="L'onglet &quot;Sélection&quot; vous permet choisir la direction et la variante sélectionnée pour chaque ligne" xml:space="preserve">
@@ -237,11 +252,23 @@
   <data name="L'onglet &quot;Véhicules&quot; vous permet d'afficher la liste des véhicules ayant un capteur" xml:space="preserve">
     <value>The "Vehicles" tab contains the list of the vehicle which have a sensor</value>
   </data>
+  <data name="La ligne en gras affiche la prochaine station du véhicule" xml:space="preserve">
+    <value>The bold line indicates the next stop</value>
+  </data>
   <data name="La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur" xml:space="preserve">
     <value>The search can be made by name, by stock number or by sensor ID</value>
   </data>
+  <data name="Le premier bouton indique la ligne du véhicule" xml:space="preserve">
+    <value>The first button indicates the line of the vehicle</value>
+  </data>
+  <data name="Le second indique sa direction" xml:space="preserve">
+    <value>The second indicates its direction</value>
+  </data>
+  <data name="Le troisième indique son retard" xml:space="preserve">
+    <value>The third indicates its delay</value>
+  </data>
   <data name="Les prochains horaires de passage des correspondances sont aussi affichés" xml:space="preserve">
-    <value>The next stop times for the connections are also displayed</value>
+    <value>The next stop times for the connecting lines are also displayed</value>
   </data>
   <data name="Lignes" xml:space="preserve">
     <value>Lines</value>
@@ -257,6 +284,9 @@
   </data>
   <data name="Masquer les véhicules" xml:space="preserve">
     <value>Hide the vehicles</value>
+  </data>
+  <data name="Masquer toutes les lignes" xml:space="preserve">
+    <value>Hide all the lines</value>
   </data>
   <data name="Non Renseigné" xml:space="preserve">
     <value>Not Known</value>
@@ -285,25 +315,28 @@
   <data name="Rechercher parmi les véhicules" xml:space="preserve">
     <value>Search among the vehicles</value>
   </data>
+  <data name="Retard Inconnu" xml:space="preserve">
+    <value>Unknown Delay</value>
+  </data>
+  <data name="Retour" xml:space="preserve">
+    <value>Way Back</value>
+  </data>
   <data name="statut du véhicule inconnu" xml:space="preserve">
     <value>unknown vehicle status</value>
   </data>
   <data name="statut OK" xml:space="preserve">
     <value>OK status</value>
   </data>
-  <data name="Supprimer toutes les lignes sélectionnées" xml:space="preserve">
-    <value>Remove all selected lines</value>
-  </data>
   <data name="Sélection" xml:space="preserve">
     <value>Selection</value>
   </data>
-  <data name="Utilisez le champ correspondant pour rechercher parmi les véhicules." xml:space="preserve">
-    <value>Use the search field to search among the vehicles.</value>
+  <data name="Utilisez le champ correspondant pour rechercher parmi les véhicules" xml:space="preserve">
+    <value>Use the search field to search among the vehicles</value>
   </data>
   <data name="Véhicules" xml:space="preserve">
     <value>Vehicles</value>
   </data>
   <data name="[numéro du capteur]: statut du capteur (voir ci-dessus pour la signification des couleurs de statut)" xml:space="preserve">
-    <value>[sensor ID]: sensor status see above for the status colors meaning)</value>
+    <value>[sensor ID]: sensor status (see above for the status colors meaning)</value>
   </data>
 </root>

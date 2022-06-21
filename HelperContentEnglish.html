@@ -1,0 +1,71 @@
+<div class="helper_main_div_style">
+    <p class="helper_heading1">Map area:</p>
+	<p class="helper_heading2">Click on a vehicle to display the corresponding information:</p>
+	<p class="helper_line_with_paddingtop">
+	    <i class="fas fa-circle helper_circle grey_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding">: unknown vehicle status - </span>
+		<i class="fas fa-circle helper_circle green_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding"> : OK status OK - </span>
+		<i class="fas fa-circle helper_circle orange_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i><span class="helper_padding"> : no received signal since 5min - </span>
+		<i class="fas fa-circle helper_circle red_icon" aria-hidden="true"></i><i class="fas fa-bus helper_icon black_icon" aria-hidden="true"></i>: no received signal since more than 10min
+	</p>
+	<p class="helper_line">
+	    <i class="fas fa-users helper_icon grey_icon" aria-hidden="true"></i>: no load prediction - 
+		<i class="fas fa-users helper_icon green_icon" aria-hidden="true"></i><span class="helper_padding">: light load - </span>
+		<i class="fas fa-users helper_icon orange_icon" aria-hidden="true"></i><span class="helper_padding">: moderate load - </span>
+		<i class="fas fa-users helper_icon red_icon" aria-hidden="true"></i>: important load
+	</p>
+	<p class="helper_line">The first button indicates the line of the vehicle</p>
+	<p class="helper_line"><span class="direction_button_helper">Way In</span> <span>The second indicates its direction</span></p>
+	<p class="helper_line"><span class="delay_button_helper">Late</span> <span>The third indicates its delay</span></p>
+	<p class="helper_line">The bold line indicates the next stop</p>
+	<p class="helper_line"><i class="fas fa-circle helper_circle grey_icon" aria-hidden="true"></i><span>[sensor ID]: sensor status (see above for the status colors meaning)</span></p>
+	<br>
+	<p class="helper_heading2">Click on a station to display the next three stop times in the selected direction</p>
+	<p class="helper_line_with_paddingtop">The next stop times for the connecting lines are also displayed</p>
+	<p class="helper_line"><i class="fas fa-users helper_icon grey_icon" aria-hidden="true"></i><span>: estimated load for this stop (see above for the load colors meaning)</span></p>
+	<p class="helper_line">
+	    <i class="fas fa-broadcast-tower helper_icon grey_icon" aria-hidden="true"></i><span class="helper_padding">:the stop time is theoretical - </span>
+		<i class="fas fa-broadcast-tower helper_icon green_icon" aria-hidden="true"></i><span>:the stop time is computed in real time</span>
+	</p>
+	<br>
+	<p class="helper_heading1">Menu area:</p>
+	<p class="helper_heading2">The "Lines" tab is used to select the lines your are interested in</p>
+	<p class="helper_line_with_paddingtop">Hover the mouse over a line to hide the others</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border rounded_border">
+		    <i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i>
+			<span class="carto_button_text">Hide lines</span>
+		</span>    This button makes the other lines become greyed instead of hidden
+	</p>
+	<p class="helper_line">Click on a line to deselect it</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i>
+		</span>    This button hides all the lines of its corresponding category
+	</p>
+	<br>
+	<p class="helper_heading2">The "Selection" tab is used to choose the direction and the variation for each line</p>
+	<p class="helper_line_with_paddingtop">Click on one line to display its different variations and the stations list of the selected variation</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-arrow-right" aria-hidden="true"></i></span>     This button changes the direction
+	</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary btn-sm rounded_border"><i class="fas fa-times carto_button_icon" aria-hidden="true"></i>
+		</span>     This button is used to deselect the line
+	</p>
+	<p class="helper_line">Click on any variant to select it</p>
+	<p class="helper_line">Hover the mouse over one of the stations of the list to display the corresponding information</p>
+	<p class="helper_line">On the right to the station is displayed the possible connections</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border"><i class="fas fa-times carto_button_icon" aria-hidden="true"></i><span class="carto_button_text">Remove all selected lines</span>
+		</span>     This button is used to deselect all the lines
+	</p>
+	<br>
+	<p class="helper_heading2">The "Vehicles" tab contains the list of the vehicle which have a sensor</p>
+	<p class="helper_line_with_paddingtop">Use the search field to search among the vehicles</p>
+	<p class="helper_line">The search can be made by name, by stock number or by sensor ID</p>
+	<p class="helper_line">Hover the mouse over one of the vehicles of the list to display the corresponding information</p>
+	<p class="helper_line">Click on a vehicle to zoom on it</p>
+	<p class="helper_line">
+	    <span class="btn btn-outline-primary rounded_border"><i class="fas fa-eye-slash carto_button_icon" aria-hidden="true"></i><span class="carto_button_text">Hide the vehicles</span>
+		</span>     This button masks all vehicles
+	</p>
+</div>

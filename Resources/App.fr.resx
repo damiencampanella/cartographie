@@ -120,6 +120,9 @@
   <data name="A droite de chaque station sont affichées les correspondances possibles" xml:space="preserve">
     <value>A droite de chaque station sont affichées les correspondances possibles</value>
   </data>
+  <data name="A l'heure" xml:space="preserve">
+    <value>A l'heure</value>
+  </data>
   <data name="Accès à la position des véhicules impossible" xml:space="preserve">
     <value>Accès à la position des véhicules impossible</value>
   </data>
@@ -129,8 +132,14 @@
   <data name="Afficher les véhicules" xml:space="preserve">
     <value>Afficher les véhicules</value>
   </data>
+  <data name="Afficher toutes les lignes" xml:space="preserve">
+    <value>Afficher toutes les lignes</value>
+  </data>
   <data name="Aide en ligne" xml:space="preserve">
     <value>Aide en ligne</value>
+  </data>
+  <data name="Aller" xml:space="preserve">
+    <value>Aller</value>
   </data>
   <data name="Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes" xml:space="preserve">
     <value>Amenez la souris au-dessus d'un des véhicules de la liste pour afficher les informations correspondantes</value>
@@ -210,8 +219,17 @@
   <data name="Courses" xml:space="preserve">
     <value>Courses</value>
   </data>
-  <data name="Date au format" xml:space="preserve">
-    <value>Date au format</value>
+  <data name="Date au format &lt;b&gt;JJ/MM/AAAA&lt;/b&gt;" xml:space="preserve">
+    <value>Date au format &lt;b&gt;JJ/MM/AAAA&lt;/b&gt;</value>
+  </data>
+  <data name="Direction Inconnue" xml:space="preserve">
+    <value>Direction Inconnue</value>
+  </data>
+  <data name="En avance" xml:space="preserve">
+    <value>En avance</value>
+  </data>
+  <data name="En retard" xml:space="preserve">
+    <value>En retard</value>
   </data>
   <data name="Enlever de la sélection" xml:space="preserve">
     <value>Enlever de la sélection</value>
@@ -219,17 +237,14 @@
   <data name="Gestion du compte" xml:space="preserve">
     <value>Gestion du compte</value>
   </data>
-  <data name="JJ/MM/AAAA" xml:space="preserve">
-    <value>JJ/MM/AAAA</value>
-  </data>
   <data name="l'horaire de passage donné est théorique" xml:space="preserve">
     <value>l'horaire de passage donné est théorique</value>
   </data>
   <data name="l'horaire de passage est calculé en temps réel" xml:space="preserve">
     <value>l'horaire de passage est calculé en temps réel</value>
   </data>
-  <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent:" xml:space="preserve">
-    <value>L'onglet "Lignes" vous permet de sélectionner les lignes qui vous intéressent:</value>
+  <data name="L'onglet &quot;Lignes&quot; vous permet de sélectionner les lignes qui vous intéressent" xml:space="preserve">
+    <value>L'onglet "Lignes" vous permet de sélectionner les lignes qui vous intéressent</value>
   </data>
   <data name="L'onglet &quot;Sélection&quot; vous permet choisir la direction et la variante sélectionnée pour chaque ligne" xml:space="preserve">
     <value>L'onglet "Sélection" vous permet choisir la direction et la variante sélectionnée pour chaque ligne</value>
@@ -237,8 +252,20 @@
   <data name="L'onglet &quot;Véhicules&quot; vous permet d'afficher la liste des véhicules ayant un capteur" xml:space="preserve">
     <value>L'onglet "Véhicules" vous permet d'afficher la liste des véhicules ayant un capteur</value>
   </data>
+  <data name="La ligne en gras affiche la prochaine station du véhicule" xml:space="preserve">
+    <value>La ligne en gras affiche la prochaine station du véhicule</value>
+  </data>
   <data name="La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur" xml:space="preserve">
     <value>La recherche peut se faire par nom, par numéro de stock (chiffre entre parenthèses) ou par numéro de capteur</value>
+  </data>
+  <data name="Le premier bouton indique la ligne du véhicule" xml:space="preserve">
+    <value>Le premier bouton indique la ligne du véhicule</value>
+  </data>
+  <data name="Le second indique sa direction" xml:space="preserve">
+    <value>Le second indique sa direction</value>
+  </data>
+  <data name="Le troisième indique son retard" xml:space="preserve">
+    <value>Le troisième indique son retard</value>
   </data>
   <data name="Les prochains horaires de passage des correspondances sont aussi affichés" xml:space="preserve">
     <value>Les prochains horaires de passage des correspondances sont aussi affichés</value>
@@ -257,6 +284,9 @@
   </data>
   <data name="Masquer les véhicules" xml:space="preserve">
     <value>Masquer les véhicules</value>
+  </data>
+  <data name="Masquer toutes les lignes" xml:space="preserve">
+    <value>Masquer toutes les lignes</value>
   </data>
   <data name="Non Renseigné" xml:space="preserve">
     <value>Non Renseigné</value>
@@ -285,20 +315,23 @@
   <data name="Rechercher parmi les véhicules" xml:space="preserve">
     <value>Rechercher parmi les véhicules</value>
   </data>
+  <data name="Retard Inconnu" xml:space="preserve">
+    <value>Retard Inconnu</value>
+  </data>
+  <data name="Retour" xml:space="preserve">
+    <value>Retour</value>
+  </data>
   <data name="statut du véhicule inconnu" xml:space="preserve">
     <value>statut du véhicule inconnu</value>
   </data>
   <data name="statut OK" xml:space="preserve">
     <value>statut OK</value>
   </data>
-  <data name="Supprimer toutes les lignes sélectionnées" xml:space="preserve">
-    <value>Supprimer toutes les lignes sélectionnées</value>
-  </data>
   <data name="Sélection" xml:space="preserve">
     <value>Sélection</value>
   </data>
-  <data name="Utilisez le champ correspondant pour rechercher parmi les véhicules." xml:space="preserve">
-    <value>Utilisez le champ correspondant pour rechercher parmi les véhicules.</value>
+  <data name="Utilisez le champ correspondant pour rechercher parmi les véhicules" xml:space="preserve">
+    <value>Utilisez le champ correspondant pour rechercher parmi les véhicules</value>
   </data>
   <data name="Véhicules" xml:space="preserve">
     <value>Véhicules</value>

@@ -1,11 +1,15 @@
 ﻿@namespace BlazorFlowly.Components
 
+@using  System.Globalization
+
+@inject IJSRuntime jsRuntime
 @inject Microsoft.Extensions.Localization.IStringLocalizer<App> Localize
 
-<AntDesign.Tooltip Placement="@Placement.Bottom" Title="HelperContent">
-	<DatePicker @bind-Value="@Date" Style="@Style" Format="dd/MM/yyyy" Picker="@DatePickerType.Date" DisabledDate="@disabledDate"  OnChange="SetDateInput"/>
-</AntDesign.Tooltip>
+@using BlazorFlowly.Components;
 
+<TooltipComponent Title=@HelperContent>
+	<input id="datepicker" style=@Style/>
+</TooltipComponent>
 
 @code {
 	[Parameter]
@@ -20,11 +24,18 @@
 	public Action<DateTime> SetInput { get; set; }
 
 	[Parameter]
-	public RenderFragment HelperContent { get; set; }   
+	public string HelperContent { get; set; }   
 
+	//<input type="date" style=@Style data-date-format="dd-mm-yyyy" data-date-startDate=@StartDate value="Date" @onchange=SetDateInput>  
 
-	private void SetDateInput(){
-		if(Date != null){
+	//<div class="input-group date" data-provide="datepicker">
+	//	<input type="text" class="datepicker" style=@Style data-date-format="dd-mm-yyyy" data-date-startDate=@StartDate value="Date" @onchange=SetDateInput>
+	//		<span class="input-group-addon"><i class="far fa-calendar-alt"></i></span>
+	//</div>
+
+	private void SetDateInput(ChangeEventArgs dateEvent){
+		if(dateEvent.Value != null){
+			Date = Convert.ToDateTime(dateEvent.Value);
 			SetInput.Invoke((DateTime)Date);
 		} 
 	}
@@ -42,13 +53,18 @@
 		base.OnParametersSet();
 
 		if (HelperContent == null) {
-			HelperContent = @<div>
-							    <p> @GetLocalizedString("Date au format")</p>
-							    <b>@GetLocalizedString("JJ/MM/AAAA")</b>
-							</div>;
+			HelperContent = GetLocalizedString("Date au format <b>JJ/MM/AAAA</b>");
 
 		}
 	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender) {
+
+        await base.OnAfterRenderAsync(firstRender);
+
+		await JSInterops.InitDatePickers(jsRuntime, CultureInfo.CurrentCulture.Name.ToLower());
+    }
+
 
 	private string GetLocalizedString(string input)
     {

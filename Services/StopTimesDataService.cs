@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Flowly.Api.StopTimes;
 using BlazorFlowly.Models;
+using Utf8Json;
 
 namespace BlazorFlowly.Services
 {
@@ -43,10 +44,21 @@ namespace BlazorFlowly.Services
                     throw new System.ArgumentNullException(nameof(content));
                 }
 
-                string contentString = await content.ReadAsStringAsync();
+                //string contentString = await content.ReadAsStringAsync();
+                byte[] contentBytes = await content.ReadAsByteArrayAsync();
 
                 try {
-                    results = Utf8Json.JsonSerializer.Deserialize<ApiStopTimes>(contentString);
+                    JsonReader reader = new JsonReader(contentBytes);
+                    results = JsonSerializer.Deserialize<ApiStopTimes>(ref reader, ApiStopTimesResolver.Instance);
+
+                    // Serialization test
+                    //JsonWriter writer = new JsonWriter();
+                    //JsonSerializer.Serialize<ApiStopTimes>(ref writer, results, ApiStopTimesResolver.Instance);
+                    //JsonReader reader2 = new JsonReader(writer.ToUtf8ByteArray());
+                    //ApiStopTimes stopTimes = JsonSerializer.Deserialize<ApiStopTimes>(ref reader2, ApiStopTimesResolver.Instance);
+
+                    // Other deserializers
+                    //results = Utf8Json.JsonSerializer.Deserialize<ApiStopTimes>(contentString);
                     //results = System.Text.Json.JsonSerializer.Deserialize<ApiStopTimes>(contentString);
                     //results = Newtonsoft.Json.JsonConvert.DeserializeObject<ApiStopTimes>(contentString); // comparable
                 }
